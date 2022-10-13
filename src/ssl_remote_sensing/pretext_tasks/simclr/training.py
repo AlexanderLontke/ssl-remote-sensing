@@ -16,7 +16,7 @@ class SimCLRTraining(pl.LightningModule):
         self.augment = Augment(config.img_size, norm_means=norm_means, norm_stds=norm_stds)
         self.model = AddProjection(config, model=model, mlp_dim=feat_dim)
 
-        self.loss = InfoNceLoss(config.batch_size, temperature=self.config.temperature)
+        self.loss = InfoNceLoss(temperature=self.config.temperature)
 
     def forward(self, batch, *args, **kwargs) -> torch.Tensor:
         return self.model(batch)

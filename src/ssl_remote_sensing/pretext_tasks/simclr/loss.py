@@ -10,13 +10,9 @@ class InfoNceLoss(nn.Module):
     InfoNCE loss as in SimCLR paper
     """
 
-    def __init__(self, batch_size, temperature=0.5):
+    def __init__(self, temperature=0.5):
         super().__init__()
-        self.batch_size = batch_size
         self.temperature = temperature
-        self.mask = (
-            ~torch.eye(batch_size * 2, batch_size * 2, dtype=torch.bool)
-        ).float()
 
     @staticmethod
     def calc_similarity_batch(a, b):
@@ -31,8 +27,12 @@ class InfoNceLoss(nn.Module):
         where corresponding indices are pairs
         z_i, z_j as in the SimCLR paper
         """
-        assert proj_1.shape[0] == proj_2.shape[0], "Projections' shapes need to match"
+        assert proj_1.shape == proj_2.shape, "Projections' shapes need to match"
         batch_size = proj_1.shape[0]
+        mask = (
+            ~torch.eye(batch_size * 2, batch_size * 2, dtype=torch.bool)
+        ).float()
+
         z_i = F.normalize(proj_1, p=2, dim=1)
         z_j = F.normalize(proj_2, p=2, dim=1)
 
@@ -45,10 +45,14 @@ class InfoNceLoss(nn.Module):
 
         nominator = torch.exp(positives / self.temperature)
 
-        denominator = device_as(self.mask, similarity_matrix) * torch.exp(
+        print("mask", device_as(mask, similarity_matrix).shape)
+        print("exp", torch.exp(
+            similarity_matrix / self.temperature
+        ).shape)
+        denominator = device_as(mask, similarity_matrix) * torch.exp(
             similarity_matrix / self.temperature
         )
 
         all_losses = torch.log(nominator / torch.sum(denominator, dim=1))
-        loss = torch.sum(all_losses) / (2 * self.batch_size)
+        loss = torch.sum(all_losses) / (2 * batch_size)
         return loss
