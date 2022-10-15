@@ -1,10 +1,10 @@
 from pytorch_lightning import LightningModule
-from .generator import Generator
-from .discriminator import Discriminator
+from ssl_remote_sensing.pretext_tasks.gan.generator import Generator
+from ssl_remote_sensing.pretext_tasks.gan..discriminator import Discriminator
 import torch
 import torch.nn.functional as F
 import torchvision
-from .utils import weights_init
+from ssl_remote_sensing.pretext_tasks.gan..utils import weights_init
 from collections import OrderedDict
 
 class GAN(LightningModule):
