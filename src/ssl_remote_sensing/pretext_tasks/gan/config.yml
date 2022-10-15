@@ -1,0 +1,24 @@
+# base settings
+seed: 1234
+
+# directories
+eurosat_data_dir: "ssl_remote_sensing/data"
+
+# data preparation settings
+image_height: 64
+image_width: 64
+num_channels: 3
+
+# generator/discriminator settings
+size_latent: 100
+g_featuremaps: 64
+d_featuremaps: 64
+num_gpus: 1
+
+# training settings
+max_epochs: 100
+batch_size: 32
+num_workers: 8
+lr: 0.001
+b1: 0.9
+b2: 0.999
