@@ -29,9 +29,7 @@ class InfoNceLoss(nn.Module):
         """
         assert proj_1.shape == proj_2.shape, "Projections' shapes need to match"
         batch_size = proj_1.shape[0]
-        mask = (
-            ~torch.eye(batch_size * 2, batch_size * 2, dtype=torch.bool)
-        ).float()
+        mask = (~torch.eye(batch_size * 2, batch_size * 2, dtype=torch.bool)).float()
 
         z_i = F.normalize(proj_1, p=2, dim=1)
         z_j = F.normalize(proj_2, p=2, dim=1)
@@ -46,9 +44,7 @@ class InfoNceLoss(nn.Module):
         nominator = torch.exp(positives / self.temperature)
 
         print("mask", device_as(mask, similarity_matrix).shape)
-        print("exp", torch.exp(
-            similarity_matrix / self.temperature
-        ).shape)
+        print("exp", torch.exp(similarity_matrix / self.temperature).shape)
         denominator = device_as(mask, similarity_matrix) * torch.exp(
             similarity_matrix / self.temperature
         )

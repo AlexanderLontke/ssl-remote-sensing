@@ -34,14 +34,14 @@ class FullyConnectedBlock(nn.Module):
     Model used for ML-Challenge
     """
 
-    def __init__(self, input_dim: int):
+    def __init__(self, input_dim: int, output_dim):
         """
         Model definition
         """
         super().__init__()
         self.fc1 = nn.Linear(input_dim, 512)  # 72 * 13 * 13
         self.fc2 = nn.Linear(512, 124)
-        self.fc3 = nn.Linear(124, 10)
+        self.fc3 = nn.Linear(124, output_dim)
 
     def forward(self, x):
         """
@@ -60,15 +60,13 @@ class DownstreamClassificationNet(nn.Module):
     Model used for ML-Challenge
     """
 
-    def __init__(self, input_dim: int, encoder=None):
+    def __init__(self, input_dim: int, encoder: nn.Module = None, output_dim: int = 10):
         """
         Model definition
         """
         super().__init__()
         self.encoder = encoder if encoder else EncoderBlock()
-        self.fc = FullyConnectedBlock(
-            input_dim=input_dim
-        )
+        self.fc = FullyConnectedBlock(input_dim=input_dim, output_dim=output_dim)
 
     def forward(self, x):
         """

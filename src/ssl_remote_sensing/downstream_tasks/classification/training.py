@@ -10,15 +10,13 @@ from tqdm import tqdm
 from torchvision.datasets import EuroSAT
 from torch.utils.data import SubsetRandomSampler, DataLoader
 
-from ssl_remote_sensing.downstream_tasks.classification.model import DownstreamClassificationNet
+from ssl_remote_sensing.downstream_tasks.classification.model import (
+    DownstreamClassificationNet,
+)
 
 
 # Specify Data
-eurosat_ds = EuroSAT(
-    root="./",
-    download=True,
-    transform=T.ToTensor()
-)
+eurosat_ds = EuroSAT(root="./", download=True, transform=T.ToTensor())
 
 # Creating data indices for training and validation splits:
 random_seed = 42
@@ -49,9 +47,9 @@ test_dl = DataLoader(
 )
 
 # First of all, let's verify if a GPU is available on our compute machine. If not, the cpu will be used instead.
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-print('Device used: {}'.format(device))
+print("Device used: {}".format(device))
 model = DownstreamClassificationNet(input_dim=72 * 13 * 13).to(device)
 
 # define the optimization criterion / loss function
@@ -61,7 +59,6 @@ loss_criterion = nn.CrossEntropyLoss().to(device)
 learning_rate = 0.001
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 print(model)
-
 
 
 # specify the training parameters
@@ -116,4 +113,6 @@ for epoch in range(num_epochs):
 
     # print epoch loss
     now = datetime.utcnow().strftime("%Y%m%d-%H:%M:%S")
-    print(f"[LOG {now}] epoch: {epoch+1} train-loss: {train_epoch_loss} validation-loss: {validation_epoch_loss}")
+    print(
+        f"[LOG {now}] epoch: {epoch+1} train-loss: {train_epoch_loss} validation-loss: {validation_epoch_loss}"
+    )
