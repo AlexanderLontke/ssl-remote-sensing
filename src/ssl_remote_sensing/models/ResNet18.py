@@ -227,9 +227,11 @@ class ResNetDecoder(nn.Module):
         x = self.conv1(x)
         return x
 
+# encoder
 def resnet18_encoder(first_conv, maxpool1):
     return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], first_conv, maxpool1)
 
+# decoder
 def resnet18_decoder(latent_dim, input_height, first_conv, maxpool1):
     return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim, input_height, first_conv, maxpool1)
 
