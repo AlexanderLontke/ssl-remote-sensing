@@ -99,7 +99,7 @@ class DecoderBlock(nn.Module):
         return out
 
 class ResNetEncoder(nn.Module):
-    def __init__(self, block, layers, first_conv=False, maxpool1=False):
+    def __init__(self, block, layers, first_conv=True, maxpool1=True):
         super().__init__()
 
         self.inplanes = 64
@@ -159,7 +159,7 @@ class ResNetEncoder(nn.Module):
 class ResNetDecoder(nn.Module):
     """Resnet in reverse order."""
 
-    def __init__(self, block, layers, latent_dim, input_height, first_conv=False, maxpool1=False):
+    def __init__(self, block, layers, latent_dim, input_height, first_conv=True, maxpool1=True):
         super().__init__()
 
         self.expansion = block.expansion
