@@ -1,4 +1,5 @@
 import torch
+import wandb
 import pytorch_lightning as pl
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from torch.optim import SGD, Adam
@@ -28,6 +29,7 @@ class SimCLRTraining(pl.LightningModule):
         z1 = self.model(x1)
         z2 = self.model(x2)
         loss = self.loss(z1, z2)
+        wandb.log({"training_loss": loss})
         self.log(
             "InfoNCE loss",
             loss,

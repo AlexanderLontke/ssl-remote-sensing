@@ -43,12 +43,10 @@ class InfoNceLoss(nn.Module):
 
         nominator = torch.exp(positives / self.temperature)
 
-        print("mask", device_as(mask, similarity_matrix).shape)
-        print("exp", torch.exp(similarity_matrix / self.temperature).shape)
         denominator = device_as(mask, similarity_matrix) * torch.exp(
             similarity_matrix / self.temperature
         )
 
-        all_losses = torch.log(nominator / torch.sum(denominator, dim=1))
+        all_losses = -torch.log(nominator / torch.sum(denominator, dim=1))
         loss = torch.sum(all_losses) / (2 * batch_size)
         return loss
