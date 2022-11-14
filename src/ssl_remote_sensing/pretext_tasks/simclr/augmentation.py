@@ -23,15 +23,17 @@ class Augment:
         self.train_transform = T.Compose(
             [
                 # Crop image on a random scale from 7% tpo 100%
+                # Only Use cropping since according to Wang et al. 2022
+                # it is the only augmentation that has a significant impact
                 T.RandomResizedCrop(size=img_size),
-                # Flip image horizontally with 50% probability
-                T.RandomHorizontalFlip(p=0.5),
-                # Apply heavy color jitter with 80% probability
-                T.RandomApply([color_jitter], p=0.8),
-                # Apply gaussian blur with 50% probability
-                T.RandomApply([blur], p=0.5),
-                # Convert RGB images to grayscale with 20% probability
-                T.RandomGrayscale(p=0.2),
+                # # Flip image horizontally with 50% probability
+                # T.RandomHorizontalFlip(p=0.5),
+                # # Apply heavy color jitter with 80% probability
+                # T.RandomApply([color_jitter], p=0.8),
+                # # Apply gaussian blur with 50% probability
+                # T.RandomApply([blur], p=0.5),
+                # # Convert RGB images to grayscale with 20% probability
+                # T.RandomGrayscale(p=0.2),
                 T.ToTensor(),
                 T.Normalize(
                     mean=norm_means,
