@@ -8,13 +8,10 @@ def default(val, def_val):
 
 
 class AddProjection(nn.Module):
-    def __init__(self, config, model=None, mlp_dim=512):
+    def __init__(self, config, mlp_dim=512):
         super(AddProjection, self).__init__()
         embedding_size = config.embedding_size
         self.backbone = resnet18_encoder()
-        mlp_dim = default(mlp_dim, self.backbone.fc.in_features)
-        print("DIM MLP input:", mlp_dim)
-        self.backbone.fc = nn.Identity()
 
         # add mlp projection head
         self.projection = nn.Sequential(

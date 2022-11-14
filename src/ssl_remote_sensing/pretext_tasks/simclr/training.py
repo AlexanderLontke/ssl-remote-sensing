@@ -11,13 +11,13 @@ from ssl_remote_sensing.pretext_tasks.simclr.utils import define_parameter_group
 
 
 class SimCLRTraining(pl.LightningModule):
-    def __init__(self, config, norm_means, norm_stds, model=None, feat_dim=512):
+    def __init__(self, config, norm_means, norm_stds, feat_dim=512):
         super().__init__()
         self.config = config
         self.augment = Augment(
             config.img_size, norm_means=norm_means, norm_stds=norm_stds
         )
-        self.model = AddProjection(config, model=model, mlp_dim=feat_dim)
+        self.model = AddProjection(config, mlp_dim=feat_dim)
 
         self.loss = InfoNceLoss(temperature=self.config.temperature)
 
