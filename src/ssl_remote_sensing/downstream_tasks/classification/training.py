@@ -14,25 +14,19 @@ from ssl_remote_sensing.downstream_tasks.classification.model import (
     DownstreamClassificationNet,
 )
 
+from ssl_remote_sensing.downstream_tasks.classification.util import get_subset_samplers_for_train_test_split
+
 
 # Specify Data
 eurosat_ds = EuroSAT(root="./", download=True, transform=T.ToTensor())
 
 # Creating data indices for training and validation splits:
-random_seed = 42
 dataset_size = len(eurosat_ds)
-indices = list(range(dataset_size))
 test_split_ratio = 0.2
-split = int(np.floor(test_split_ratio * dataset_size))
 
-# Shuffle dataset
-np.random.seed(random_seed)
-np.random.shuffle(indices)
-train_indices, test_indices = indices[split:], indices[:split]
-
-# Creating PT data samplers and loaders:
-train_sampler = SubsetRandomSampler(train_indices)
-test_sampler = SubsetRandomSampler(test_indices)
+train_sampler, test_sampler = get_subset_samplers_for_train_test_split(
+    dataset_size, test_split_ratio=test_split_ratio
+)
 
 train_dl = DataLoader(
     dataset=eurosat_ds,
