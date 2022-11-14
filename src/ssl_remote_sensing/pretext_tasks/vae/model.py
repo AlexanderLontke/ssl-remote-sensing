@@ -3,18 +3,18 @@ import torch.nn as nn
 from models.ResNet18 import resnet18_encoder, resnet18_decoder
 import torchvision.models as models
 
+
 class VariationalAutoencoder(nn.Module):
-    def __init__(self,enc_out_dim = 512,latent_dim=None, input_height=64):
+    def __init__(self, enc_out_dim=512, latent_dim=None, input_height=64):
         super().__init__()
 
         self.encoder = resnet18_encoder()
         # from Lightning to Pytorch version
-        #self.encoder = models.resnet18(weights=None)
-        #self.encoder.fc = nn.Sequential()
-        
+        # self.encoder = models.resnet18(weights=None)
+        # self.encoder.fc = nn.Sequential()
+
         self.decoder = resnet18_decoder(
-            latent_dim=latent_dim,
-            input_height=input_height
+            latent_dim=latent_dim, input_height=input_height
         )
 
         # distribution parameters
@@ -49,7 +49,7 @@ class VariationalAutoencoder(nn.Module):
         log_pz = p.log_prob(z)
 
         # kl
-        kl = (log_qzx - log_pz)
+        kl = log_qzx - log_pz
         kl = kl.sum(-1)
         return kl
 
@@ -76,7 +76,7 @@ class VariationalAutoencoder(nn.Module):
         kl = self.kl_divergence(z, mu, std)
 
         # elbo
-        elbo = (kl - recon_loss)
+        elbo = kl - recon_loss
         elbo = elbo.mean()
 
-        return x_encoded,x_hat,elbo
+        return x_encoded, x_hat, elbo

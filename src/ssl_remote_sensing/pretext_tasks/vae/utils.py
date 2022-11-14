@@ -4,11 +4,13 @@ import torch
 import matplotlib.pyplot as plt
 from torch.autograd import Variable
 
+
 def imshow(img):
     npimg = img.cpu().numpy()
-    plt.axis('off')
+    plt.axis("off")
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
+
 
 def print_model(encoder, decoder):
     print("============== Encoder ==============")
@@ -16,6 +18,7 @@ def print_model(encoder, decoder):
     print("============== Decoder ==============")
     print(decoder)
     print("")
+
 
 def get_torch_vars(x):
     if torch.cuda.is_available():

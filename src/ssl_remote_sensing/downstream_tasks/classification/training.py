@@ -14,7 +14,9 @@ from ssl_remote_sensing.downstream_tasks.classification.model import (
     DownstreamClassificationNet,
 )
 
-from ssl_remote_sensing.downstream_tasks.classification.util import get_subset_samplers_for_train_test_split
+from ssl_remote_sensing.downstream_tasks.classification.util import (
+    get_subset_samplers_for_train_test_split,
+)
 
 
 # Specify Data

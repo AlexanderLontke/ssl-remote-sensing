@@ -6,7 +6,7 @@
 #     def __init__(self,model = None):
 #         super().__init__()
 #         self.model = model
-        
+
 #     def training_step(model, batch):
 
 #         x = batch
@@ -36,5 +36,5 @@
 #         elbo = elbo.mean()
 
 #         return x_encoded,x_hat,elbo
-    
+
 #     def training

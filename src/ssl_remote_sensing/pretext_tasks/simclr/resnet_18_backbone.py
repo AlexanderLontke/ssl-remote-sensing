@@ -1,5 +1,6 @@
 import torch.nn as nn
-import torchvision.models as models
+
+from ssl_remote_sensing.models.ResNet18 import resnet18_encoder
 
 
 def default(val, def_val):
@@ -10,9 +11,7 @@ class AddProjection(nn.Module):
     def __init__(self, config, model=None, mlp_dim=512):
         super(AddProjection, self).__init__()
         embedding_size = config.embedding_size
-        self.backbone = default(
-            model, models.resnet18(weights=None, num_classes=config.embedding_size)
-        )
+        self.backbone = resnet18_encoder()
         mlp_dim = default(mlp_dim, self.backbone.fc.in_features)
         print("DIM MLP input:", mlp_dim)
         self.backbone.fc = nn.Identity()

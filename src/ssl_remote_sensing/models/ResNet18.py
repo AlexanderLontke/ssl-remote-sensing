@@ -4,6 +4,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+
 class Interpolate(nn.Module):
     """nn.Module wrapper for F.interpolate."""
 
@@ -14,25 +15,36 @@ class Interpolate(nn.Module):
     def forward(self, x):
         return F.interpolate(x, size=self.size, scale_factor=self.scale_factor)
 
+
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding."""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
+    return nn.Conv2d(
+        in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
+    )
+
 
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
+
 def resize_conv3x3(in_planes, out_planes, scale=1):
     """upsample + 3x3 convolution with padding to avoid checkerboard artifact."""
     if scale == 1:
         return conv3x3(in_planes, out_planes)
-    return nn.Sequential(Interpolate(scale_factor=scale), conv3x3(in_planes, out_planes))
+    return nn.Sequential(
+        Interpolate(scale_factor=scale), conv3x3(in_planes, out_planes)
+    )
+
 
 def resize_conv1x1(in_planes, out_planes, scale=1):
     """upsample + 1x1 convolution with padding to avoid checkerboard artifact."""
     if scale == 1:
         return conv1x1(in_planes, out_planes)
-    return nn.Sequential(Interpolate(scale_factor=scale), conv1x1(in_planes, out_planes))
+    return nn.Sequential(
+        Interpolate(scale_factor=scale), conv1x1(in_planes, out_planes)
+    )
+
 
 class EncoderBlock(nn.Module):
     """ResNet block, copied from https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L35."""
@@ -66,6 +78,7 @@ class EncoderBlock(nn.Module):
 
         return out
 
+
 class DecoderBlock(nn.Module):
     """ResNet block, but convs replaced with resize convs, and channel increase is in second conv, not first."""
 
@@ -98,12 +111,15 @@ class DecoderBlock(nn.Module):
 
         return out
 
+
 class ResNetEncoder(nn.Module):
     def __init__(self, block, layers):
         super().__init__()
 
         self.inplanes = 64
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(
+            3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
+        )
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -113,7 +129,7 @@ class ResNetEncoder(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        #self.fc = nn.Sequential()
+        # self.fc = nn.Sequential()
 
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
@@ -144,8 +160,9 @@ class ResNetEncoder(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        #x = self.fc(x)
+        # x = self.fc(x)
         return x
+
 
 class ResNetDecoder(nn.Module):
     """Resnet in reverse order."""
@@ -168,10 +185,12 @@ class ResNetDecoder(nn.Module):
         self.upscale_factor *= 2
         self.upscale = Interpolate(scale_factor=2)
         self.upscale_factor *= 2
-        
+
         self.upscale1 = Interpolate(size=input_height // self.upscale_factor)
 
-        self.conv1 = nn.Conv2d(64 * block.expansion, 3, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(
+            64 * block.expansion, 3, kernel_size=3, stride=1, padding=1, bias=False
+        )
 
     def _make_layer(self, block, planes, blocks, scale=1):
         upsample = None
@@ -207,11 +226,12 @@ class ResNetDecoder(nn.Module):
         x = self.conv1(x)
         return x
 
+
 # encoder
 def resnet18_encoder():
     return ResNetEncoder(EncoderBlock, [2, 2, 2, 2])
 
+
 # decoder
 def resnet18_decoder(latent_dim, input_height):
     return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim, input_height)
-
