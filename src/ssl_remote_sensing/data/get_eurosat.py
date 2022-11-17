@@ -1,6 +1,7 @@
 from torchvision.datasets import EuroSAT
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
+import torchvision.transforms as T
 
 means = [0.3444, 0.3803, 0.4078]
 stds = [0.2037, 0.1366, 0.1148]
@@ -17,6 +18,10 @@ stds = [0.2037, 0.1366, 0.1148]
 #     transform = transforms.Compose([
 #                   transforms.ToTensor(),
 #                   ])
+
+
+def get_eurosat_normalizer():
+    return T.Normalize(mean=means, std=stds)
 
 
 def get_eurosat(root, transform, batchsize, numworkers, split=False):
