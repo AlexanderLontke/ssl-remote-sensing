@@ -1,4 +1,5 @@
-
+import torch
+import torch.nn as nn
 from ssl_remote_sensing.models.ResNet18 import resnet18_encoder, resnet18_decoder
 
 class VariationalAutoencoder(nn.Module):
