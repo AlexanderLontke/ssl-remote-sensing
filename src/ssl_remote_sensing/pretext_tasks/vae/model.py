@@ -1,17 +1,12 @@
 import torch
 import torch.nn as nn
-from models.ResNet18 import resnet18_encoder, resnet18_decoder
-import torchvision.models as models
+from ssl_remote_sensing.models.ResNet18 import resnet18_encoder, resnet18_decoder
 
 class VariationalAutoencoder(nn.Module):
-    def __init__(self,enc_out_dim = 512,latent_dim=None, input_height=64):
+    def __init__(self,enc_out_dim = 512,latent_dim=None, input_height=64, config = None):
         super().__init__()
 
         self.encoder = resnet18_encoder()
-        # from Lightning to Pytorch version
-        #self.encoder = models.resnet18(weights=None)
-        #self.encoder.fc = nn.Sequential()
-        
         self.decoder = resnet18_decoder(
             latent_dim=latent_dim,
             input_height=input_height
@@ -24,8 +19,11 @@ class VariationalAutoencoder(nn.Module):
         # for the gaussian likelihood
         self.log_scale = nn.Parameter(torch.Tensor([0.0]))
 
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=1e-3)
+    def configure_optimizers(self,config):
+        # set optimizer
+        if config.optim == "Adam":
+          # set learning rate
+          return torch.optim.Adam(self.parameters(), lr=config.lr)
 
     def gaussian_likelihood(self, x_hat, logscale, x):
         scale = torch.exp(logscale)
