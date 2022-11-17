@@ -36,6 +36,7 @@ def batch_mean_and_sd(loader):
     return mean,std
 
 def imshow(img):
+    fig, ax = plt.subplots(1, figsize=(15,15))
     npimg = img.cpu().numpy()
     plt.axis('off')
     plt.imshow(np.transpose(npimg, (1, 2, 0)))

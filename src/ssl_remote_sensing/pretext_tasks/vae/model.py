@@ -19,7 +19,7 @@ class VariationalAutoencoder(nn.Module):
         # for the gaussian likelihood
         self.log_scale = nn.Parameter(torch.Tensor([0.0]))
 
-    def configure_optimizers(self):
+    def configure_optimizers(self,config):
         # set optimizer
         if config.optim == "Adam":
           # set learning rate
