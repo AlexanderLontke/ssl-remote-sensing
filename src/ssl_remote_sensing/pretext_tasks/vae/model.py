@@ -3,7 +3,7 @@ import torch.nn as nn
 from models.ResNet18 import resnet18_encoder, resnet18_decoder
 
 class VariationalAutoencoder(nn.Module):
-    def __init__(self,enc_out_dim = 512,latent_dim=d, input_height=64, config = train_config):
+    def __init__(self,enc_out_dim = 512,latent_dim=None, input_height=64, config = None):
         super().__init__()
 
         self.encoder = resnet18_encoder()
