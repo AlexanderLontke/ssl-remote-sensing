@@ -4,7 +4,7 @@ from ssl_remote_sensing.models.ResNet18 import resnet18_encoder, resnet18_decode
 
 
 class VariationalAutoencoder(nn.Module):
-    def __init__(self,enc_out_dim = 512,latent_dim=None, input_height=64, config = None):
+    def __init__(self, enc_out_dim=512, latent_dim=None, input_height=64, config=None):
         super().__init__()
 
         self.encoder = resnet18_encoder()
@@ -19,11 +19,11 @@ class VariationalAutoencoder(nn.Module):
         # for the gaussian likelihood
         self.log_scale = nn.Parameter(torch.Tensor([0.0]))
 
-    def configure_optimizers(self,config):
+    def configure_optimizers(self, config):
         # set optimizer
         if config.optim == "Adam":
-          # set learning rate
-          return torch.optim.Adam(self.parameters(), lr=config.lr)
+            # set learning rate
+            return torch.optim.Adam(self.parameters(), lr=config.lr)
 
     def gaussian_likelihood(self, x_hat, logscale, x):
         scale = torch.exp(logscale)
