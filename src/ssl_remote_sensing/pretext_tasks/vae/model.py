@@ -1,6 +1,5 @@
-import torch
-import torch.nn as nn
-from models.ResNet18 import resnet18_encoder, resnet18_decoder
+
+from ssl_remote_sensing.models.ResNet18 import resnet18_encoder, resnet18_decoder
 
 class VariationalAutoencoder(nn.Module):
     def __init__(self,enc_out_dim = 512,latent_dim=None, input_height=64, config = None):
