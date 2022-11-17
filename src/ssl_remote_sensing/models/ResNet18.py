@@ -1,4 +1,5 @@
 # ResNet18 model
+# copied from https://github.com/Lightning-AI/lightning-bolts/blob/master/pl_bolts/models/autoencoders/components.py 
 
 import torch
 from torch import nn

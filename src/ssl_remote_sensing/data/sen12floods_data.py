@@ -118,11 +118,8 @@ class SEN12FLOODS:
             bands.append(band.read())
         s2_img = np.concatenate(bands, axis=0)
         s2_img = np.array(s2_img, dtype=np.float32)
-        # CHANGE TO RGB
-        s2_img = s2_img[[3, 2, 1], :, :]
-        # NORMALIZATION
-        s2_img = (s2_img - s2_img.min()) / (s2_img.max() - s2_img.min())
-
+        #print(s2_img.shape)
+        
         # Loop over both polarization, and create a concatenated array for sentinel-1 data
         bands = []
         for file in ["VH.tif", "VV.tif"]:
@@ -145,6 +142,7 @@ class SEN12FLOODS:
         mask = rio.open(self.s2_masks[index])
         mask_img = mask.read().squeeze()
 
+
         # Apply same data augmentation for both sentinel 2 and sentinel 1 images, and the mask.
         augmented_data = self.augmentation(
             image=np.transpose(s2_img, (1, 2, 0)),
@@ -158,7 +156,8 @@ class SEN12FLOODS:
             "s1_img": augmented_data["image0"],
             "s2_imgfile": self.s2_images[index],
             "s1_imgfile": self.s1_images[index],
-            "mask": augmented_data["mask"],
+            "mask": augmented_data['mask'],
+            #"mask": np.expand_dims(augmented_data['mask'], axis=0),
         }
 
         return output_tensor
@@ -250,10 +249,9 @@ class SEN12FLOODS:
 
         axs[0].imshow(s1_img_vh)
         axs[0].set_title("Sentinel-1 VH")
-        axs[0].axis("off")
-
-        s2_img_rgb = s2_image
-        # s2_img_rgb = s2_image[[3, 2, 1], :, :]
+        axs[0].axis('off')
+        
+        s2_img_rgb = s2_image[[3, 2, 1], :, :]
         s2_img_rgb = np.transpose(s2_img_rgb, (1, 2, 0))
         s2_img_rgb = s2_img_rgb / s2_img_rgb.max()
 
@@ -268,13 +266,3 @@ class SEN12FLOODS:
         axs[2].axis("off")
 
         plt.show()
-
-
-trainset = SEN12FLOODS(root="/content/chips/", transforms=True, split="train")
-
-valset = SEN12FLOODS(root="/content/chips/", split="val")
-
-
-train_loader = DataLoader(trainset, batch_size=8, pin_memory=True)
-
-val_loader = DataLoader(valset, batch_size=8, pin_memory=True)
