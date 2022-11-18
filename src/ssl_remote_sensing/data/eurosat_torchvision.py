@@ -3,11 +3,9 @@ import torchvision.transforms as transforms
 from torchvision.datasets import EuroSAT
 from torch.utils.data import DataLoader
 
+
 class EuroSATDataModule(LightningDataModule):
-    def __init__(
-        self,
-        config
-    ):
+    def __init__(self, config):
         super().__init__()
         self.data_dir = config.eurosat_data_dir
         self.batch_size = config.batch_size
@@ -26,16 +24,14 @@ class EuroSATDataModule(LightningDataModule):
         # download
         EuroSAT(self.data_dir, download=True)
 
-
-    def setup(self, stage = None):
+    def setup(self, stage=None):
         if stage == "fit":
             self.eurosat_train = EuroSAT(self.data_dir, transform=self.transform)
-
 
     def train_dataloader(self):
         return DataLoader(
             self.eurosat_train,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            shuffle=True
+            shuffle=True,
         )

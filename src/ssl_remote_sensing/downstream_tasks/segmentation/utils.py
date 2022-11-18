@@ -1,9 +1,10 @@
 import os
 import torch
 import torch.nn as nn
+from src.ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
 
 
-def load_best_model(model_name, model_save_name):
+def load_best_model(model_name, model_save_name, model_dir):
 
     if model_name == "VAE":
         best_model = VariationalAutoencoder()

@@ -2,14 +2,14 @@ import torch
 import torch.nn as nn
 from ssl_remote_sensing.models.ResNet18 import resnet18_encoder, resnet18_decoder
 
+
 class VariationalAutoencoder(nn.Module):
-    def __init__(self,enc_out_dim = 512,latent_dim=None, input_height=64, config = None):
+    def __init__(self, enc_out_dim=512, latent_dim=None, input_height=64, config=None):
         super().__init__()
 
         self.encoder = resnet18_encoder()
         self.decoder = resnet18_decoder(
-            latent_dim=latent_dim,
-            input_height=input_height
+            latent_dim=latent_dim, input_height=input_height
         )
 
         # distribution parameters
@@ -19,11 +19,11 @@ class VariationalAutoencoder(nn.Module):
         # for the gaussian likelihood
         self.log_scale = nn.Parameter(torch.Tensor([0.0]))
 
-    def configure_optimizers(self,config):
+    def configure_optimizers(self, config):
         # set optimizer
         if config.optim == "Adam":
-          # set learning rate
-          return torch.optim.Adam(self.parameters(), lr=config.lr)
+            # set learning rate
+            return torch.optim.Adam(self.parameters(), lr=config.lr)
 
     def gaussian_likelihood(self, x_hat, logscale, x):
         scale = torch.exp(logscale)
@@ -47,7 +47,7 @@ class VariationalAutoencoder(nn.Module):
         log_pz = p.log_prob(z)
 
         # kl
-        kl = (log_qzx - log_pz)
+        kl = log_qzx - log_pz
         kl = kl.sum(-1)
         return kl
 
@@ -74,7 +74,7 @@ class VariationalAutoencoder(nn.Module):
         kl = self.kl_divergence(z, mu, std)
 
         # elbo
-        elbo = (kl - recon_loss)
+        elbo = kl - recon_loss
         elbo = elbo.mean()
 
-        return x_encoded,x_hat,elbo
+        return x_encoded, x_hat, elbo

@@ -10,8 +10,10 @@ CONFIG_FILE_PATH = TASK_ROOT / "config.yml"
 DATASET_DIR = ROOT / "data"
 TRAINED_MODEL_DIR = ROOT / "models"
 
+
 class Config(BaseModel):
     """Master config object."""
+
     eurosat_data_dir: str
     image_height: int
     image_width: int
@@ -26,6 +28,7 @@ class Config(BaseModel):
     lr: float
     b1: float
     b2: float
+
 
 def find_config_file() -> Path:
     """Locate the configuration file."""
