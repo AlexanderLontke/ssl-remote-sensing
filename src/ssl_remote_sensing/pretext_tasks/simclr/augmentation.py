@@ -9,7 +9,7 @@ class Augment:
     denoted x_i and  x_j which we consider a positive pair.
     """
 
-    def __init__(self, img_size, norm_means, norm_stds, s=1):
+    def __init__(self, img_size, normalizer: T.Normalize, s=1):
         color_jitter = T.ColorJitter(0.8 * s, 0.8 * s, 0.8 * s, 0.2 * s)
         # 10% of the image
         blur = T.GaussianBlur(
@@ -22,7 +22,7 @@ class Augment:
 
         self.train_transform = T.Compose(
             [
-                # Crop image on a random scale from 7% tpo 100%
+                # Crop image on a random scale from 7% to 100%
                 T.RandomResizedCrop(size=img_size),
                 # Flip image horizontally with 50% probability
                 T.RandomHorizontalFlip(p=0.5),
@@ -33,10 +33,7 @@ class Augment:
                 # Convert RGB images to grayscale with 20% probability
                 T.RandomGrayscale(p=0.2),
                 T.ToTensor(),
-                T.Normalize(
-                    mean=norm_means,
-                    std=norm_stds,
-                ),
+                normalizer,
             ]
         )
 

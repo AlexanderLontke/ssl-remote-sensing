@@ -41,7 +41,9 @@ def patch_first_conv(encoder, new_in_channels, default_in_channels=3):
     module.in_channels = new_in_channels  
     print("New module: ", module)       
 
-    new_weight = torch.Tensor(module.out_channels, new_in_channels // module.groups, *module.kernel_size)
+    new_weight = torch.Tensor(
+        module.out_channels, new_in_channels // module.groups, *module.kernel_size
+    )
     for i in range(new_in_channels):
         new_weight[:, i] = weight[:, i % default_in_channels]
 
