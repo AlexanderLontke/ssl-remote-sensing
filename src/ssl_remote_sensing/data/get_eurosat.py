@@ -24,7 +24,7 @@ def get_eurosat_normalizer():
     return T.Normalize(mean=means, std=stds)
 
 
-def get_eurosat(root, transform, batchsize, numworkers, split=False):
+def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False):
 
     dataset = EuroSAT(root, transform=transform, download=True)
     print("[LOG] Total number of images: {}".format(len(dataset)))

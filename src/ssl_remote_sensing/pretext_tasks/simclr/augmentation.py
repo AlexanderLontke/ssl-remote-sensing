@@ -9,7 +9,7 @@ class Augment:
     denoted x_i and  x_j which we consider a positive pair.
     """
 
-    def __init__(self, img_size, normalize: T.Normalize, s=1):
+    def __init__(self, img_size, normalizer: T.Normalize, s=1):
         color_jitter = T.ColorJitter(0.8 * s, 0.8 * s, 0.8 * s, 0.2 * s)
         # 10% of the image
         blur = T.GaussianBlur(
@@ -32,7 +32,7 @@ class Augment:
                 T.RandomApply([blur], p=0.5),
                 # Convert RGB images to grayscale with 20% probability
                 T.RandomGrayscale(p=0.2),
-                normalize,
+                normalizer,
                 T.ToTensor(),
             ]
         )
