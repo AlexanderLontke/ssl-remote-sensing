@@ -20,7 +20,7 @@ def load_encoder_checkpoint_from_pretext_model(
         raise NotImplementedError()
     elif "gan" in path_to_checkpoint.lower():
         raise NotImplementedError()
-    elif RANDOM_INITIALIZATION in path_to_checkpoint:
+    elif path_to_checkpoint == RANDOM_INITIALIZATION:
         return resnet18_encoder()
     else:
         raise ValueError(
