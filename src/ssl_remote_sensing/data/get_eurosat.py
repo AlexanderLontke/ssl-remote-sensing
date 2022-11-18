@@ -28,14 +28,11 @@ def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False):
 
     dataset = EuroSAT(root, transform=transform, download=True)
     print("[LOG] Total number of images: {}".format(len(dataset)))
-    print("[LOG] Size of the image is: {}".format(dataset[0][0].shape))
     print(f"[LOG] Batch size is {batchsize}")
 
     if split:
-
         train_set, val_set = random_split(dataset, [21600, 5400])
         print(f"[LOG] Total images in the train set is: {len(train_set)}")
-
         train_loader = DataLoader(
             dataset=train_set,
             batch_size=batchsize,
@@ -45,17 +42,14 @@ def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False):
         print(
             "[LOG] Total number of batches in the trainloader: %d" % len(train_loader)
         )
-
         val_loader = DataLoader(
             dataset=val_set, batch_size=batchsize, num_workers=numworkers, shuffle=True
         )
         print("[LOG] Total number of batches in the valloader: %d" % len(val_loader))
         return train_loader, val_loader
-
     else:
         train_set = dataset
         print(f"[LOG] Total images in the train set is: {len(train_set)}")
-
         train_loader = DataLoader(
             dataset=train_set,
             batch_size=batchsize,

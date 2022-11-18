@@ -32,8 +32,8 @@ class Augment:
                 T.RandomApply([blur], p=0.5),
                 # Convert RGB images to grayscale with 20% probability
                 T.RandomGrayscale(p=0.2),
-                normalizer,
                 T.ToTensor(),
+                normalizer,
             ]
         )
 
