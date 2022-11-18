@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
 from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
+from sklearn.metrics import confusion_matrix, accuracy_score, jaccard_score
 
 # from ssl_remote_sensing.pretext_tasks.simclr.config import get_simclr_config
-from ssl_remote_sensing.pretext_tasks.simclr.resnet_18_backbone import AddProjection
 
 
 def load_best_model(model_name, model_save_name, model_dir, train_config=None):
@@ -57,3 +57,46 @@ def patch_first_conv(encoder, new_in_channels, default_in_channels=3):
 
     # make sure in_channel is changed
     assert module.in_channels == new_in_channels
+
+
+def get_metrics(true, preds):
+    matrix = confusion_matrix(true.flatten(), preds.flatten())
+    class_0, class_1 = matrix.diagonal() / matrix.sum(axis=1)
+    print('***************** Metrics *****************')
+    print('Class 0 (no water) accuracy: {:.3f}'.format(class_0))
+    print('Class 1 (water) accuracy: {:.3f}'.format(class_1))
+    print('Overall accuracy: {:.3f}'.format(accuracy_score(true.flatten(), preds.flatten())))
+    print('Equally Weighted accuracy: {:.3f}'.format(0.5 * class_0 + 0.5 * class_1))
+    print('IoU: {:.3f}'.format(jaccard_score(true.flatten(), preds.flatten())))
+    print('*******************************************')
+
+
+def display_outputs(idx=None, multi=False):
+    # Pick a random index if none is specified
+    if not idx:
+        idx = random.randint(0, len(valset))
+    print('Validation image ID: {}'.format(idx))
+    
+    # Get Sentinel 2 and Sentinel 1 data
+    s2_data = torch.unsqueeze(valset.__getitem__(idx)['s2_img'].float().to(device), 0)
+    s1_data = torch.unsqueeze(valset.__getitem__(idx)['s1_img'].float().to(device), 0)
+    
+    # Get predictions from the model
+    if multi:
+        output = model(s1_data, s2_data)
+    else:
+        output = model(s2_data)
+    
+    # Threshold the output to generate the binary map (FYI: the threshold value "0" can be tuned as any other hyperparameter)
+    output_binary = torch.zeros(output.shape)
+    output_binary[output >= 0] = 1
+    
+    get_metrics(valset.__getitem__(idx)['mask'], output_binary)
+    
+    fig, axes = plt.subplots(1, 3, figsize=(15, 7))
+    axes[0].imshow(np.transpose(valset.__getitem__(idx)['s2_img'][[3,2,1],:,:], (1, 2, 0)) / valset.__getitem__(idx)['s2_img'].max())
+    axes[0].set_title('True Color Sentinel-2')
+    axes[2].imshow(valset.__getitem__(idx)['mask'], cmap='Blues')
+    axes[2].set_title('Groundtruth')
+    axes[1].imshow(output_binary.squeeze(), cmap='Blues')
+    axes[1].set_title('Predicted Mask')
