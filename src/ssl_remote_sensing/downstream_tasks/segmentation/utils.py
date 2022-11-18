@@ -18,15 +18,18 @@ def best_model_loader(pretext_model,saved_model_path):
 
     return best_model
 
+# funciton to change first convolution layer input channels => make random kaiming normal initialization
+
 def patch_first_conv(encoder, new_in_channels, default_in_channels=3):
 
     for module in encoder.modules():
-            if isinstance(module, nn.Conv2d) and module.in_channels == 3:
-                print(module)
-                break
+        if isinstance(module, nn.Conv2d) and module.in_channels == 3:
+            print("Module to be convoluted: ", module)
+            break
 
-    weight = module.weight.detach()          
-    module.in_channels = 13
+    weight = module.weight.detach()
+    module.in_channels = new_in_channels  
+    print("New module: ", module)       
 
     new_weight = torch.Tensor(module.out_channels, new_in_channels // module.groups, *module.kernel_size)
     for i in range(new_in_channels):
@@ -34,3 +37,6 @@ def patch_first_conv(encoder, new_in_channels, default_in_channels=3):
 
     new_weight = new_weight * (default_in_channels / new_in_channels)
     module.weight = nn.parameter.Parameter(new_weight)
+
+    # make sure in_channel is changed
+    assert module.in_channels == new_in_channels
