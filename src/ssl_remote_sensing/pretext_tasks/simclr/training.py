@@ -4,17 +4,15 @@ import pytorch_lightning as pl
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from torch.optim import SGD, Adam
 
-from ssl_remote_sensing.pretext_tasks.simclr.augmentation import Augment
 from ssl_remote_sensing.pretext_tasks.simclr.loss import InfoNceLoss
 from ssl_remote_sensing.pretext_tasks.simclr.resnet_18_backbone import AddProjection
 from ssl_remote_sensing.pretext_tasks.simclr.utils import define_parameter_groups
 
 
 class SimCLRTraining(pl.LightningModule):
-    def __init__(self, config, norm_means, norm_stds, feat_dim=512):
+    def __init__(self, config, feat_dim=512):
         super().__init__()
         self.config = config
-        self.augment = Augment(config.img_size, )
         self.model = AddProjection(config, mlp_dim=feat_dim)
 
         self.loss = InfoNceLoss(temperature=self.config.temperature)
