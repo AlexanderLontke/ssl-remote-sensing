@@ -26,8 +26,9 @@ class SimCLRTraining(pl.LightningModule):
         z2 = self.model(x2)
         loss = self.loss(z1, z2)
 
+        wandb.log({"train/InfoNCE": loss})
         self.log(
-            "InfoNCE loss",
+            "train/InfoNCE",
             loss,
             on_step=True,
             on_epoch=True,
