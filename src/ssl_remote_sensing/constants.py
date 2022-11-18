@@ -1,1 +1,2 @@
 RANDOM_INITIALIZATION = "random"
+STATE_DICT_KEY = "state_dict"
