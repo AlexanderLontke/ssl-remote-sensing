@@ -2,17 +2,20 @@ import os
 import torch
 import torch.nn as nn
 
-def best_model_loader(pretext_model,saved_model_path):
+def load_best_model(model_name,model_save_name):
 
-    # restore pre-trained model snapshot
-    best_model_name = saved_model_path
+    if model_name == "VAE":
+        best_model = VariationalAutoencoder()
+
+    elif model_name == "GAN":
+        best_model = VariationalAutoencoder()
+
+    elif model_name == "SimCLR":
+        best_model = VariationalAutoencoder()
 
     # load state_dict from path
-    state_dict_best = torch.load(best_model_name, map_location=torch.device('cpu'))
-
-    # init pre-trained model class
-    best_model = pretext_model
-
+    best_model_path = os.path.join(model_dir, model_save_name)
+    state_dict_best = torch.load(best_model_path, map_location=torch.device('cpu'))
     # load pre-trained models
     best_model.load_state_dict(state_dict_best)
 
