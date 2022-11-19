@@ -25,7 +25,7 @@ def load_encoder_checkpoint_from_pretext_model(
         config = get_bigan_config()
         model = BiganResnetEncoder(config.latent_dim, config.feature_maps_enc, config.image_channels, pretrained_model=resnet_basemodel)
         state_dict_best = torch.load(path_to_checkpoint, map_location=torch.device('cpu'))
-        model.load(state_dict_best)
+        model.load_state_dict(state_dict_best)
         return model
     elif path_to_checkpoint == RANDOM_INITIALIZATION:
         return resnet18_encoder()
