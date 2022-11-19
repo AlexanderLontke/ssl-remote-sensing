@@ -36,7 +36,7 @@ def visualize_simclr_augmentation(original_images: List[Image.Image]):
         # Augment input image
         augment1, augment2 = aug(image)
         images = [image, augment1, augment2]
-        # Insert all images into grip
+        # Insert all images into grid
         for j, img in enumerate(images):
             # Convert tensors if necessary
             if isinstance(img, torch.Tensor):
