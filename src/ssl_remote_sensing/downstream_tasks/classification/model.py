@@ -65,17 +65,18 @@ class DownstreamClassificationNet(nn.Module):
         Model definition
         """
         super().__init__()
+        self.gan_encoder = gan_encoder
         self.encoder = encoder if encoder else EncoderBlock()
         self.fc = FullyConnectedBlock(input_dim=input_dim, output_dim=output_dim)
 
-    def forward(self, x, gan_encoder=False):
+    def forward(self, x):
         """
         Model forward pass
         :param x: List of image samples
         :return:
         """
         x = self.encoder(x)
-        if gan_encoder == True:
+        if self.gan_encoder == True:
             x = torch.flatten(x,1)
         x = self.fc(x)
         return x
