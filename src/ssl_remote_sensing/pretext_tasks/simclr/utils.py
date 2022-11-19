@@ -1,8 +1,12 @@
 import torch
 import numpy as np
+from torch import nn
+from PIL import Image
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
+from ssl_remote_sensing.pretext_tasks.simclr.augmentation import Augment
 
 
 def imshow(img, norm_means, norm_stds):
@@ -15,6 +19,31 @@ def imshow(img, norm_means, norm_stds):
     npimg = unnormalize(img).numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
+
+
+def visualize_simclr_augmentation(original_images: List[Image.Image]):
+    assert len(original_images) > 0, "Passed empty list"
+    # Initialize SimCLR augmentation
+    aug = Augment(img_size=64, normalizer=nn.Identity())
+    transform_to_pil = T.ToPILImage()
+    # Precompute dimensions
+    w, h = original_images[0].size
+    rows = 3
+    cols = len(original_images)
+    # Create new grid image
+    grid = Image.new('RGB', size=(cols * w, rows * h))
+    for i, image in enumerate(original_images):
+        # Augment input image
+        augment1, augment2 = aug(image)
+        images = [image, augment1, augment2]
+        # Insert all images into grip
+        for j, img in enumerate(images):
+            # Convert tensors if necessary
+            if isinstance(img, torch.Tensor):
+                img = transform_to_pil(img)
+            print(i, j)
+            grid.paste(img, box=(i * h, j * w))
+    return grid
 
 
 def reproducibility(config):
