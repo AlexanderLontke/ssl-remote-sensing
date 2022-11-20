@@ -75,5 +75,7 @@ class DownstreamClassificationNet(nn.Module):
         :return:
         """
         x = self.encoder(x)
+        if self.gan_encoder == True:
+            x = torch.flatten(x,1)
         x = self.fc(x)
         return x
