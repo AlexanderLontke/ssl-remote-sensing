@@ -79,7 +79,7 @@ def load_encoder_checkpoint_from_pretext_model(
 
     else:
         raise ValueError(
-            f"Checkpoint name has to contain simclr, vae, or gan but was {path_to_checkpoint}"
+            f"Checkpoint name has to contain simclr, vae, or bigan but was {path_to_checkpoint}"
         )
         
 def get_metrics(true, preds):

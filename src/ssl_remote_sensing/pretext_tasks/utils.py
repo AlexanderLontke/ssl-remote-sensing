@@ -34,9 +34,9 @@ def load_encoder_checkpoint_from_pretext_model(
         state_dict_best = torch.load(path_to_checkpoint, map_location=torch.device('cpu'))
         model.load_state_dict(state_dict_best)
         return model
-    elif path_to_checkpoint == RANDOM_INITIALIZATION:
+    elif path_to_checkpoint == '/content/drive/MyDrive/deep_learning_checkpoints/random':
         return resnet18_encoder()
     else:
         raise ValueError(
-            f"Checkpoint name has to contain simclr, vae, or gan but was {path_to_checkpoint}"
+            f"Checkpoint name has to contain simclr, vae, or bigan but was {path_to_checkpoint}"
         )
