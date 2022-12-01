@@ -60,11 +60,12 @@ class DownstreamClassificationNet(nn.Module):
     Model used for ML-Challenge
     """
 
-    def __init__(self, input_dim: int, encoder: nn.Module = None, output_dim: int = 10):
+    def __init__(self, input_dim: int, encoder: nn.Module = None, output_dim: int = 10, gan_encoder: bool = False):
         """
         Model definition
         """
         super().__init__()
+        self.gan_encoder = gan_encoder
         self.encoder = encoder if encoder else EncoderBlock()
         self.fc = FullyConnectedBlock(input_dim=input_dim, output_dim=output_dim)
 
