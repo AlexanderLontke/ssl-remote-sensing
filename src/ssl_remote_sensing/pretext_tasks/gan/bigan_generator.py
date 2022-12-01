@@ -1,12 +1,21 @@
 import torch.nn as nn
 from torch import Tensor
 
+
 class BiganResnetGenerator(nn.Module):
-    def __init__(self, latent_dim: int, feature_maps: int, image_channels: int, pretrained_model: nn.Module) -> None:
+    def __init__(
+        self,
+        latent_dim: int,
+        feature_maps: int,
+        image_channels: int,
+        pretrained_model: nn.Module,
+    ) -> None:
         super(BiganResnetGenerator, self).__init__()
         # input dim: 100 x 1 x 1
         self.noise_init = nn.Sequential(
-            self._make_gen_block(latent_dim, feature_maps * 8, kernel_size = 4, stride = 1, padding = 0),
+            self._make_gen_block(
+                latent_dim, feature_maps * 8, kernel_size=4, stride=1, padding=0
+            ),
             self._make_gen_block(feature_maps * 8, feature_maps * 4),
             self._make_gen_block(feature_maps * 4, feature_maps * 2),
             self._make_gen_block(feature_maps * 2, feature_maps),
@@ -16,7 +25,9 @@ class BiganResnetGenerator(nn.Module):
         self.pretrained_model = pretrained_model
         # input dim: 512 x 1 x 1
         self.gen = nn.Sequential(
-            self._make_gen_block(feature_maps * 8, feature_maps * 8, kernel_size = 4, stride = 1, padding = 0),
+            self._make_gen_block(
+                feature_maps * 8, feature_maps * 8, kernel_size=4, stride=1, padding=0
+            ),
             self._make_gen_block(feature_maps * 8, feature_maps * 4),
             self._make_gen_block(feature_maps * 4, feature_maps * 2),
             self._make_gen_block(feature_maps * 2, feature_maps),
@@ -26,7 +37,6 @@ class BiganResnetGenerator(nn.Module):
 
         self.noise_init.apply(self._weights_init)
         self.gen.apply(self._weights_init)
-    
 
     @staticmethod
     def _make_gen_block(
@@ -40,17 +50,21 @@ class BiganResnetGenerator(nn.Module):
     ) -> nn.Sequential:
         if not last_block:
             gen_block = nn.Sequential(
-                nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
+                nn.ConvTranspose2d(
+                    in_channels, out_channels, kernel_size, stride, padding, bias=bias
+                ),
                 nn.BatchNorm2d(out_channels),
                 nn.ReLU(True),
             )
         else:
             gen_block = nn.Sequential(
-                nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
+                nn.ConvTranspose2d(
+                    in_channels, out_channels, kernel_size, stride, padding, bias=bias
+                ),
                 nn.Tanh(),
             )
         return gen_block
-    
+
     @staticmethod
     def _make_enc_block(
         in_channels: int,
@@ -63,16 +77,20 @@ class BiganResnetGenerator(nn.Module):
     ) -> nn.Sequential:
         if not last_block:
             enc_block = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
+                nn.Conv2d(
+                    in_channels, out_channels, kernel_size, stride, padding, bias=bias
+                ),
                 nn.BatchNorm2d(out_channels),
                 nn.ReLU(True),
             )
         else:
             enc_block = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
+                nn.Conv2d(
+                    in_channels, out_channels, kernel_size, stride, padding, bias=bias
+                ),
                 nn.Tanh(),
             )
-        
+
         return enc_block
 
     @staticmethod
