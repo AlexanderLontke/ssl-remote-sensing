@@ -4,7 +4,7 @@ import numpy as np
 import glob
 import torch.utils.data as data
 import matplotlib.pyplot as plt
-import tqdm
+from tqdm import tqdm
 
 class DFC2020(data.Dataset):
     """PyTorch dataset class for the DFC2020 dataset"""
