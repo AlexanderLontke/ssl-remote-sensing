@@ -1,3 +1,4 @@
+import os
 import rasterio
 import numpy as np
 import glob
