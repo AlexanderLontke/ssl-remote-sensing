@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import random
 import wandb
-from numpy import np
+import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
