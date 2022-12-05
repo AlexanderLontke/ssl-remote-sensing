@@ -6,17 +6,20 @@ import torch.utils.data as data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+
 class DFC2020(data.Dataset):
     """PyTorch dataset class for the DFC2020 dataset"""
 
-    def __init__(self,
-                 path,
-                 subset="val",
-                 no_savanna=False,
-                 use_s2hr=False,
-                 use_s2mr=False,
-                 use_s2lr=False,
-                 use_s1=False):
+    def __init__(
+        self,
+        path,
+        subset="val",
+        no_savanna=False,
+        use_s2hr=False,
+        use_s2mr=False,
+        use_s2lr=False,
+        use_s1=False,
+    ):
         """Initialize the dataset"""
 
         # inizialize
@@ -24,8 +27,10 @@ class DFC2020(data.Dataset):
 
         # make sure parameters are okay
         if not (use_s2hr or use_s2mr or use_s2lr or use_s1):
-            raise ValueError("No input specified, set at least one of "
-                             + "use_[s2hr, s2mr, s2lr, s1] to True!")
+            raise ValueError(
+                "No input specified, set at least one of "
+                + "use_[s2hr, s2mr, s2lr, s1] to True!"
+            )
         self.use_s2hr = use_s2hr
         self.use_s2mr = use_s2mr
         self.use_s2lr = use_s2lr
@@ -38,9 +43,8 @@ class DFC2020(data.Dataset):
 
         # provide index of channel(s) suitable for previewing the input
         self.display_channels, self.brightness_factor = get_display_channels(
-                                                            use_s2hr,
-                                                            use_s2mr,
-                                                            use_s2lr)
+            use_s2hr, use_s2mr, use_s2lr
+        )
 
         # provide number of classes
         if no_savanna:
@@ -61,36 +65,55 @@ class DFC2020(data.Dataset):
         for s2_loc in tqdm(s2_locations, desc="[Load]"):
             s1_loc = s2_loc.replace("_s2_", "_s1_").replace("s2_", "s1_")
             lc_loc = s2_loc.replace("_dfc_", "_lc_").replace("s2_", "dfc_")
-            self.samples.append({"lc": lc_loc, "s1": s1_loc, "s2": s2_loc,
-                                 "id": os.path.basename(s2_loc)})
+            self.samples.append(
+                {
+                    "lc": lc_loc,
+                    "s1": s1_loc,
+                    "s2": s2_loc,
+                    "id": os.path.basename(s2_loc),
+                }
+            )
 
         # sort list of samples
-        self.samples = sorted(self.samples, key=lambda i: i['id'])
+        self.samples = sorted(self.samples, key=lambda i: i["id"])
 
-        print("loaded", len(self.samples),
-              "samples from the dfc2020 subset", subset)
+        print("loaded", len(self.samples), "samples from the dfc2020 subset", subset)
 
     def __getitem__(self, index):
         """Get a single example from the dataset"""
 
         # get and load sample from index file
         sample = self.samples[index]
-        return load_sample(sample, self.use_s1, self.use_s2hr, self.use_s2mr,
-                           self.use_s2lr, no_savanna=self.no_savanna,
-                           igbp=False)
+        return load_sample(
+            sample,
+            self.use_s1,
+            self.use_s2hr,
+            self.use_s2mr,
+            self.use_s2lr,
+            no_savanna=self.no_savanna,
+            igbp=False,
+        )
 
     def __len__(self):
         """Get number of samples in the dataset"""
         return len(self.samples)
 
-    def visualize_observation(self,idx):
+    def visualize_observation(self, idx):
         sample = self.__getitem__(idx)
         img = sample["image"]
         label = sample["label"]
 
-        print("id:", sample["id"], "\n",
-          "input shape:", img.shape, "\n",
-          "label shape:", label.shape, "\n")
+        print(
+            "id:",
+            sample["id"],
+            "\n",
+            "input shape:",
+            img.shape,
+            "\n",
+            "label shape:",
+            label.shape,
+            "\n",
+        )
 
         fig, axs = plt.subplots(1, 2, figsize=(10, 6))
 
@@ -111,7 +134,7 @@ class DFC2020(data.Dataset):
         plt.show()
 
 
-#mapping from igbp to dfc2020 classes
+# mapping from igbp to dfc2020 classes
 DFC2020_CLASSES = [
     0,  # class 0 unused in both schemes
     1,
@@ -130,8 +153,8 @@ DFC2020_CLASSES = [
     6,  # 14 --> 6
     8,
     9,
-    10
-    ]
+    10,
+]
 
 # indices of sentinel-2 high-/medium-/low-resolution bands
 S2_BANDS_HR = [2, 3, 4, 8]
@@ -156,6 +179,7 @@ def load_s2(path, use_hr, use_mr, use_lr):
     s2 = s2.astype(np.float32)
     return s2
 
+
 # util function for reading s1 data
 def load_s1(path):
     with rasterio.open(path) as data:
@@ -167,6 +191,7 @@ def load_s1(path):
     s1 += 1
     s1 = s1.astype(np.float32)
     return s1
+
 
 # util function for reading lc data
 def load_lc(path, no_savanna=False, igbp=True):
@@ -191,9 +216,18 @@ def load_lc(path, no_savanna=False, igbp=True):
     lc[lc == -1] = 255
     return lc
 
+
 # util function for reading data from single sample
-def load_sample(sample, use_s1, use_s2hr, use_s2mr, use_s2lr,
-                no_savanna=False, igbp=True, unlabeled=False):
+def load_sample(
+    sample,
+    use_s1,
+    use_s2hr,
+    use_s2mr,
+    use_s2lr,
+    no_savanna=False,
+    igbp=True,
+    unlabeled=False,
+):
 
     use_s2 = use_s2hr or use_s2mr or use_s2lr
 
@@ -210,10 +244,46 @@ def load_sample(sample, use_s1, use_s2hr, use_s2mr, use_s2lr,
 
     # load label
     if unlabeled:
-        return {'image': img, 'id': sample["id"]}
+        return {"image": img, "id": sample["id"]}
     else:
         lc = load_lc(sample["lc"], no_savanna=no_savanna, igbp=igbp)
-        return {'image': img, 'label': lc, 'id': sample["id"]}
+
+        return {"image": img, "label": lc, "id": sample["id"]}
+
+
+# util function for reading data from single sample
+def load_sample_visual(
+    sample,
+    use_s1,
+    use_s2hr,
+    use_s2mr,
+    use_s2lr,
+    no_savanna=False,
+    igbp=True,
+    unlabeled=False,
+):
+
+    use_s2 = use_s2hr or use_s2mr or use_s2lr
+
+    # load s2 data
+    if use_s2:
+        img = load_s2(sample["s2"], use_s2hr, use_s2mr, use_s2lr)
+
+    # load s1 data
+    if use_s1:
+        if use_s2:
+            img = np.concatenate((img, load_s1(sample["s1"])), axis=0)
+        else:
+            img = load_s1(sample["s1"])
+
+    # load label
+    if unlabeled:
+        return {"image": img, "id": sample["id"]}
+    else:
+        lc = torch.tensor(load_lc(sample["lc"], no_savanna=no_savanna, igbp=igbp))
+
+        return {"image": img, "label": lc, "id": sample["id"]}
+
 
 # calculate number of input channels
 def get_ninputs(use_s1, use_s2hr, use_s2mr, use_s2lr):
@@ -227,6 +297,7 @@ def get_ninputs(use_s1, use_s2hr, use_s2mr, use_s2lr):
     if use_s1:
         n_inputs += 2
     return n_inputs
+
 
 # select channels for preview images
 def get_display_channels(use_s2hr, use_s2mr, use_s2lr):

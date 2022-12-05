@@ -2,6 +2,13 @@ import torch
 import torch.nn as nn
 
 
+"""
+
+Model copied and tuned from: https://github.com/usuyama/pytorch-unet/blob/master/pytorch_unet_resnet18_colab.ipynb
+
+"""
+
+
 def convrelu(in_channels, out_channels, kernel, padding):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, kernel, padding=padding),
@@ -16,7 +23,6 @@ class ResNetUNet(nn.Module):
         # test base mode: pretrained resnet 18 of imagenet
         # self.base_model = torchvision.models.resnet18(pretrained=True)
         # base model from our pre-trained model
-        # patch_first_conv
         self.base_model = encoder
         if gan_encoder:
             self.base_layers = list(list(self.base_model.children())[0].children())

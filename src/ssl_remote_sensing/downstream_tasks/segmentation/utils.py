@@ -1,6 +1,11 @@
 import os
 import torch
 import torch.nn as nn
+import random
+import wandb
+from numpy import np
+from PIL import Image
+import matplotlib.pyplot as plt
 from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
 from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
 from sklearn.metrics import confusion_matrix, accuracy_score, jaccard_score
@@ -109,3 +114,55 @@ def get_metrics(true, preds):
     print("Equally Weighted accuracy: {:.3f}".format(0.5 * class_0 + 0.5 * class_1))
     print("IoU: {:.3f}".format(jaccard_score(true.flatten(), preds.flatten())))
     print("*******************************************")
+
+
+def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=None):
+
+    if not idx:
+        idx = random.randint(0, len(valset))
+        print("Validation image ID: {}".format(idx))
+
+    sample = valset.__getitem__(idx)
+    img = sample["image"]
+    label = sample["label"]
+
+    fig, axs = plt.subplots(1, 3, figsize=(10, 6))
+
+    img_rgb = img[[3, 2, 1], :, :]
+    img_rgb = np.transpose(img_rgb, (1, 2, 0))
+    img_rgb = img_rgb / img_rgb.max()
+
+    mask = label.squeeze()
+
+    input_img = torch.from_numpy(img)
+    input_img = torch.unsqueeze(input_img.float().to(device), 0)
+    output = bst_model(input_img)
+    output = torch.nn.functional.softmax(output, dim=1)
+    output = torch.argmax(output, dim=1)
+    output = output.to("cpu").squeeze(0).numpy()
+
+    # wandb log
+    img_log = wandb.Image(img_rgb, caption="Sentinel-2 RGB")
+    wandb.log({f"Sentinal-2 RGB: {model_name}": img_log})
+    mask_log = wandb.Image(
+        Image.fromarray(np.uint8(mask)).convert("RGB"), caption="Groundtruth Mask"
+    )
+    wandb.log({f"Groundtruth Mask: {model_name}": mask_log})
+    output_log = wandb.Image(
+        Image.fromarray(np.uint8(output)).convert("RGB"), caption="Predicted Mask"
+    )
+    wandb.log({f"Predicted Mask: {model_name}": output_log})
+
+    axs[0].imshow(img_rgb)
+    axs[0].set_title("Sentinel-2 RGB")
+    axs[0].axis("off")
+
+    axs[1].imshow(mask)
+    axs[1].set_title("Groundtruth Mask")
+    axs[1].axis("off")
+
+    axs[2].imshow(output)
+    axs[2].set_title("Predicted Mask")
+    axs[2].axis("off")
+
+    plt.show()
