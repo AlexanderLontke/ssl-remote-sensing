@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import functools
 import torch.utils.model_zoo as model_zoo
 
+
 class Interpolate(nn.Module):
     """nn.Module wrapper for F.interpolate."""
 
@@ -21,9 +22,10 @@ class Interpolate(nn.Module):
 class Identity(nn.Module):
     def __init__(self):
         super().__init__()
-        
+
     def forward(self, x):
         return x
+
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding."""
@@ -249,7 +251,16 @@ def resnet18_decoder(latent_dim, input_height):
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1, norm_layer=None, dropout=0):
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        downsample=None,
+        groups=1,
+        norm_layer=None,
+        dropout=0,
+    ):
         super(BasicBlock, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -258,7 +269,7 @@ class BasicBlock(nn.Module):
         else:
             drop_layer = Identity
         if groups != 1:
-            raise ValueError('BasicBlock only supports groups=1')
+            raise ValueError("BasicBlock only supports groups=1")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.drop1 = drop_layer()
@@ -294,7 +305,16 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1, norm_layer=None, dropout=0):
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        downsample=None,
+        groups=1,
+        norm_layer=None,
+        dropout=0,
+    ):
         super(Bottleneck, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -338,31 +358,72 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         return out
-    
-class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
-                 groups=1, width_per_group=64, norm_layer=None, dropout=0.):
+
+class ResNet(nn.Module):
+    def __init__(
+        self,
+        block,
+        layers,
+        num_classes=1000,
+        zero_init_residual=False,
+        groups=1,
+        width_per_group=64,
+        norm_layer=None,
+        dropout=0.0,
+    ):
         super(ResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
-        planes = [int(width_per_group * groups * 2 ** i) for i in range(4)]
+        planes = [int(width_per_group * groups * 2**i) for i in range(4)]
         self.inplanes = planes[0]
-        self.conv1 = nn.Conv2d(3, planes[0], kernel_size=7, stride=2, padding=3,
-                               bias=False)
+        self.conv1 = nn.Conv2d(
+            3, planes[0], kernel_size=7, stride=2, padding=3, bias=False
+        )
         self.bn1 = norm_layer(planes[0])
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, planes[0], layers[0], groups=groups, norm_layer=norm_layer, dropout=dropout)
-        self.layer2 = self._make_layer(block, planes[1], layers[1], stride=2, groups=groups, norm_layer=norm_layer, dropout=dropout)
-        self.layer3 = self._make_layer(block, planes[2], layers[2], stride=2, groups=groups, norm_layer=norm_layer, dropout=dropout)
-        self.layer4 = self._make_layer(block, planes[3], layers[3], stride=2, groups=groups, norm_layer=norm_layer, dropout=dropout)
+        self.layer1 = self._make_layer(
+            block,
+            planes[0],
+            layers[0],
+            groups=groups,
+            norm_layer=norm_layer,
+            dropout=dropout,
+        )
+        self.layer2 = self._make_layer(
+            block,
+            planes[1],
+            layers[1],
+            stride=2,
+            groups=groups,
+            norm_layer=norm_layer,
+            dropout=dropout,
+        )
+        self.layer3 = self._make_layer(
+            block,
+            planes[2],
+            layers[2],
+            stride=2,
+            groups=groups,
+            norm_layer=norm_layer,
+            dropout=dropout,
+        )
+        self.layer4 = self._make_layer(
+            block,
+            planes[3],
+            layers[3],
+            stride=2,
+            groups=groups,
+            norm_layer=norm_layer,
+            dropout=dropout,
+        )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(planes[3] * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -377,7 +438,9 @@ class ResNet(nn.Module):
                 elif isinstance(m, BasicBlock):
                     nn.init.constant_(m.bn2.weight, 0)
 
-    def _make_layer(self, block, planes, blocks, stride=1, groups=1, norm_layer=None, dropout=0.):
+    def _make_layer(
+        self, block, planes, blocks, stride=1, groups=1, norm_layer=None, dropout=0.0
+    ):
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         downsample = None
@@ -388,10 +451,28 @@ class ResNet(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, groups, norm_layer, dropout=dropout))
+        layers.append(
+            block(
+                self.inplanes,
+                planes,
+                stride,
+                downsample,
+                groups,
+                norm_layer,
+                dropout=dropout,
+            )
+        )
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes, groups=groups, norm_layer=norm_layer, dropout=dropout))
+            layers.append(
+                block(
+                    self.inplanes,
+                    planes,
+                    groups=groups,
+                    norm_layer=norm_layer,
+                    dropout=dropout,
+                )
+            )
 
         return nn.Sequential(*layers)
 
@@ -407,7 +488,7 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
-        #x = x.view(x.size(0), -1)
+        # x = x.view(x.size(0), -1)
         x = self.fc(x)
 
         return x
@@ -415,7 +496,7 @@ class ResNet(nn.Module):
     def param_without_bn(self):
         param_list = []
         for p in self.named_parameters():
-            if 'bn' in p[0]:
+            if "bn" in p[0]:
                 pass
             else:
                 param_list.append(p[1])
@@ -424,20 +505,27 @@ class ResNet(nn.Module):
     def param_layerx(self, layer_up_to=1):
         param_list = []
         for p in self.named_parameters():
-            if 'bn' in p[0]:
+            if "bn" in p[0]:
                 pass
-            elif p[0].startswith('conv') or (('layer' in p[0]) and int(p[0][5]) <= layer_up_to):
+            elif p[0].startswith("conv") or (
+                ("layer" in p[0]) and int(p[0][5]) <= layer_up_to
+            ):
                 param_list.append(p[1])
         return param_list
+
 
 def resnet18_basenet(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    
+
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url('https://download.pytorch.org/models/resnet18-5c106cde.pth'))
+        model.load_state_dict(
+            model_zoo.load_url(
+                "https://download.pytorch.org/models/resnet18-5c106cde.pth"
+            )
+        )
     model.fc = nn.Sequential()
     return model

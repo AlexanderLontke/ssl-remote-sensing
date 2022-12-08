@@ -14,8 +14,8 @@ from ssl_remote_sensing.pretext_tasks.gan.bigan_generator import BiganResnetGene
 from ssl_remote_sensing.pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
 from ssl_remote_sensing.models.ResNet18 import resnet18_basenet
 
-class BIGAN(LightningModule):
 
+class BIGAN(LightningModule):
     def __init__(
         self,
         beta1: float = 0.5,
@@ -47,16 +47,28 @@ class BIGAN(LightningModule):
         self.criterion = nn.BCELoss()
 
     def _get_generator(self) -> nn.Module:
-        generator = BiganResnetGenerator(self.latent_dim, self.feature_maps_gen, self.image_channels, pretrained_model=self.pretrained_model)
+        generator = BiganResnetGenerator(
+            self.latent_dim,
+            self.feature_maps_gen,
+            self.image_channels,
+            pretrained_model=self.pretrained_model,
+        )
         return generator
 
     def _get_discriminator(self) -> nn.Module:
-        discriminator = BiganDiscriminator(self.latent_dim, self.feature_maps_disc, self.image_channels)
+        discriminator = BiganDiscriminator(
+            self.latent_dim, self.feature_maps_disc, self.image_channels
+        )
         discriminator.apply(self._weights_init)
         return discriminator
 
     def _get_encoder(self) -> nn.Module:
-        encoder = BiganResnetEncoder(self.latent_dim, self.feature_maps_enc, self.image_channels, pretrained_model=self.pretrained_model)
+        encoder = BiganResnetEncoder(
+            self.latent_dim,
+            self.feature_maps_enc,
+            self.image_channels,
+            pretrained_model=self.pretrained_model,
+        )
         return encoder
 
     @staticmethod
@@ -72,23 +84,36 @@ class BIGAN(LightningModule):
         lr = self.learning_rate
         betas = (self.beta1, 0.999)
         opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=betas)
-        opt_gen_enc = torch.optim.Adam(chain(self.generator.parameters(), self.encoder.parameters()), lr=lr, betas=betas)
+        opt_gen_enc = torch.optim.Adam(
+            chain(self.generator.parameters(), self.encoder.parameters()),
+            lr=lr,
+            betas=betas,
+        )
         return [opt_disc, opt_gen_enc], []
 
     def forward(self, noise: Tensor, x: Tensor):
 
-        z_fake = Variable(torch.randn((self.batch_size, self.latent_dim, 1, 1)), requires_grad=False).to(self.device)
+        z_fake = Variable(
+            torch.randn((self.batch_size, self.latent_dim, 1, 1)), requires_grad=False
+        ).to(self.device)
         x_fake = self.generator(z_fake)
 
         x_true = x.float()
         z_true = self.encoder(x_true)
 
-        return x_true, z_true, x_fake, z_fake, 
+        return (
+            x_true,
+            z_true,
+            x_fake,
+            z_fake,
+        )
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         x, _ = batch
 
-        z_fake = Variable(torch.randn((self.batch_size, self.latent_dim, 1, 1)), requires_grad=False).to(self.device)
+        z_fake = Variable(
+            torch.randn((self.batch_size, self.latent_dim, 1, 1)), requires_grad=False
+        ).to(self.device)
         x_fake = self.generator(z_fake)
 
         x_true = x.float()
@@ -105,17 +130,23 @@ class BIGAN(LightningModule):
 
         return result
 
-    def _disc_step(self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor) -> Tensor:
+    def _disc_step(
+        self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor
+    ) -> Tensor:
         disc_loss = self._get_disc_loss(x_true, z_true, x_fake, z_fake)
         self.log("loss/disc", disc_loss, on_epoch=True)
         return disc_loss
 
-    def _gen_enc_step(self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor) -> Tensor:
+    def _gen_enc_step(
+        self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor
+    ) -> Tensor:
         gen_enc_loss = self._get_gen_enc_loss(x_true, z_true, x_fake, z_fake)
         self.log("loss/gen_enc", gen_enc_loss, on_epoch=True)
         return gen_enc_loss
 
-    def _get_disc_loss(self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor) -> Tensor:
+    def _get_disc_loss(
+        self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor
+    ) -> Tensor:
         # Train with real
         out_true = self.discriminator(x_true, z_true)
         y_true = torch.ones_like(out_true)
@@ -130,7 +161,9 @@ class BIGAN(LightningModule):
 
         return disc_loss
 
-    def _get_gen_enc_loss(self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor) -> Tensor:
+    def _get_gen_enc_loss(
+        self, x_true: Tensor, z_true: Tensor, x_fake: Tensor, z_fake: Tensor
+    ) -> Tensor:
         # Train with real
         out_true = self.discriminator(x_true, z_true)
         y_fake = torch.zeros_like(out_true)

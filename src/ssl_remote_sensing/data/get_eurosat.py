@@ -10,12 +10,14 @@ stds = [0.2037, 0.1366, 0.1148]
 
 #     transform = transforms.Compose([
 #                 transforms.ToTensor(),
+#                 transforms.ToTensor(),
 #                 transforms.Normalize(
 #                     mean = means,
 #                     std = stds) # params computed from the eurosat data
 #                 ])
 # else:
 #     transform = transforms.Compose([
+#                   transforms.ToTensor(),
 #                   transforms.ToTensor(),
 #                   ])
 

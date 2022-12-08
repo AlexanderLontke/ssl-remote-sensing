@@ -52,7 +52,9 @@ model = SimCLRTraining(
     norm_stds=stds,
 )
 
-transform = Augment(train_config.img_size, )
+transform = Augment(
+    train_config.img_size,
+)
 
 dataset = EuroSAT(
     "/Users/alexanderlontke/datasets/", transform=transform, download=True

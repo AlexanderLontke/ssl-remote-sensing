@@ -60,7 +60,13 @@ class DownstreamClassificationNet(nn.Module):
     Model used for ML-Challenge
     """
 
-    def __init__(self, input_dim: int, encoder: nn.Module = None, output_dim: int = 10, gan_encoder: bool = False):
+    def __init__(
+        self,
+        input_dim: int,
+        encoder: nn.Module = None,
+        output_dim: int = 10,
+        gan_encoder: bool = False,
+    ):
         """
         Model definition
         """
@@ -77,6 +83,6 @@ class DownstreamClassificationNet(nn.Module):
         """
         x = self.encoder(x)
         if self.gan_encoder == True:
-            x = torch.flatten(x,1)
+            x = torch.flatten(x, 1)
         x = self.fc(x)
         return x
