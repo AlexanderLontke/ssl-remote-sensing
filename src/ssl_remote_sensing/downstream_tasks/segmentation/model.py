@@ -10,7 +10,7 @@ def convrelu(in_channels, out_channels, kernel, padding):
 
 
 class ResNetUNet(nn.Module):
-    def __init__(self, n_class, encoder=None):
+    def __init__(self, n_class, encoder=None, gan_encoder=False):
         super().__init__()
 
         # test base mode: pretrained resnet 18 of imagenet
@@ -18,7 +18,10 @@ class ResNetUNet(nn.Module):
         # base model from our pre-trained model
         # patch_first_conv
         self.base_model = encoder
-        self.base_layers = list(self.base_model.children())
+        if gan_encoder:
+            self.base_layers = list(list(self.base_model.children())[0].children())
+        else:
+            self.base_layers = list(self.base_model.children())
 
         self.layer0 = nn.Sequential(*self.base_layers[:3])  # size=(N, 64, x.H/2, x.W/2)
         self.layer0_1x1 = convrelu(64, 64, 1, 0)
