@@ -6,6 +6,7 @@ from ssl_remote_sensing.pretext_tasks.gan.config.core import config
 from pytorch_lightning.callbacks.progress import TQDMProgressBar
 import torch
 
+
 def main():
     data = EuroSATDataModule(config)
     model = GAN(config)
@@ -18,6 +19,7 @@ def main():
         logger=wandb_logger,
     )
     trainer.fit(model, data)
+
 
 if __name__ == "__main__":
     main()

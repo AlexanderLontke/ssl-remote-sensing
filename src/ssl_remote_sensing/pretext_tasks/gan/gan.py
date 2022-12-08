@@ -7,6 +7,7 @@ import torchvision
 from ssl_remote_sensing.pretext_tasks.gan.utils import weights_init
 from collections import OrderedDict
 
+
 class GAN(LightningModule):
     def __init__(
         self,
@@ -17,9 +18,13 @@ class GAN(LightningModule):
         self.config = config
         self.batch_size = config.batch_size
         self.latent_dim = config.size_latent
-        
+
         # networks
-        img_shape = (self.config.num_channels, self.config.image_width, self.config.image_height)
+        img_shape = (
+            self.config.num_channels,
+            self.config.image_width,
+            self.config.image_height,
+        )
         self.generator = Generator(config=config)
         self.generator.apply(weights_init)
         self.discriminator = Discriminator(config=config)
@@ -51,7 +56,7 @@ class GAN(LightningModule):
             # log sampled images
             sample_imgs = self.generated_imgs[:6]
             grid = torchvision.utils.make_grid(sample_imgs)
-            self.logger.experiment.add_image('generated_images', grid, 0)
+            self.logger.experiment.add_image("generated_images", grid, 0)
 
             # ground truth result (ie: all fake)
             # put on GPU because we created this tensor inside training_loop
@@ -61,12 +66,10 @@ class GAN(LightningModule):
             # adversarial loss is binary cross-entropy
             self.test = self.discriminator(self(z)).view(-1)
             g_loss = self.adversarial_loss(self.discriminator(self(z)).view(-1), valid)
-            tqdm_dict = {'g_loss': g_loss}
-            output = OrderedDict({
-                'loss': g_loss,
-                'progress_bar': tqdm_dict,
-                'log': tqdm_dict
-            })
+            tqdm_dict = {"g_loss": g_loss}
+            output = OrderedDict(
+                {"loss": g_loss, "progress_bar": tqdm_dict, "log": tqdm_dict}
+            )
             return output
 
         # train discriminator
@@ -84,16 +87,15 @@ class GAN(LightningModule):
             fake = fake.type_as(imgs).view(-1)
 
             fake_loss = self.adversarial_loss(
-                self.discriminator(self(z).detach()).view(-1), fake)
+                self.discriminator(self(z).detach()).view(-1), fake
+            )
 
             # discriminator loss is the average of these
             d_loss = (real_loss + fake_loss) / 2
-            tqdm_dict = {'d_loss': d_loss}
-            output = OrderedDict({
-                'loss': d_loss,
-                'progress_bar': tqdm_dict,
-                'log': tqdm_dict
-            })
+            tqdm_dict = {"d_loss": d_loss}
+            output = OrderedDict(
+                {"loss": d_loss, "progress_bar": tqdm_dict, "log": tqdm_dict}
+            )
             return output
 
     def configure_optimizers(self):

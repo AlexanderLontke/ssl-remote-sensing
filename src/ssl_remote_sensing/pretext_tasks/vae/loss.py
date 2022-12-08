@@ -1,11 +1,10 @@
-
 # import torch
 
 # class VAELoss():
 
 #     def __init__(self):
 #         super.__init__
-    
+
 #     def gaussian_likelihood(x_hat, logscale, x):
 #         scale = torch.exp(logscale)
 #         mean = x_hat
@@ -14,7 +13,7 @@
 #         # measure prob of seeing image under p(x|z)
 #         log_pxz = dist.log_prob(x)
 #         return log_pxz.sum(dim=(1, 2, 3))
-    
+
 #     def kl_divergence(self, z, mu, std):
 #         # --------------------------
 #         # Monte carlo KL divergence
@@ -31,7 +30,3 @@
 #         kl = (log_qzx - log_pz)
 #         kl = kl.sum(-1)
 #         return kl
-    
-
-
-    
