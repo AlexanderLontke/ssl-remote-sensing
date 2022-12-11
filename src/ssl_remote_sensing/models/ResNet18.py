@@ -378,7 +378,7 @@ class ResNet(nn.Module):
         planes = [int(width_per_group * groups * 2**i) for i in range(4)]
         self.inplanes = planes[0]
         self.conv1 = nn.Conv2d(
-            3, planes[0], kernel_size=7, stride=2, padding=3, bias=False
+            12, planes[0], kernel_size=7, stride=2, padding=3, bias=False
         )
         self.bn1 = norm_layer(planes[0])
         self.relu = nn.ReLU(inplace=True)
