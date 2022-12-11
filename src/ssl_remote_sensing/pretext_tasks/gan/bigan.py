@@ -109,7 +109,7 @@ class BIGAN(LightningModule):
         )
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        x, _ = batch
+        x = batch
 
         z_fake = Variable(
             torch.randn((self.batch_size, self.latent_dim, 1, 1)), requires_grad=False
