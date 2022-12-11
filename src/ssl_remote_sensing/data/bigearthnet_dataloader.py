@@ -23,7 +23,7 @@ class BigearthnetDataModule(LightningDataModule):
         train_transforms = self.train_transform() if self.train_transforms is None else self.train_transforms
 
         self.train_dataset = Bigearthnet(
-            root=self.data_dir,
+            dataset_dir=self.data_dir,
             #bands=self.bands,
             transform=train_transforms
         )
