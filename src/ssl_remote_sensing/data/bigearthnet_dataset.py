@@ -80,7 +80,7 @@ class Bigearthnet(Dataset):
             ch = normalize(ch, mean=BAND_STATS['mean'][b], std=BAND_STATS['std'][b])
             channels.append(ch)   
         img = np.dstack(channels)
-        #img = torch.from_numpy(img)
+        img = torch.from_numpy(img)
 
         if self.transform is not None:
             img = self.transform(img)
