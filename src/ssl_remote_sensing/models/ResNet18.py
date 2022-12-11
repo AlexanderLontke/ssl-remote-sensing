@@ -378,7 +378,7 @@ class ResNet(nn.Module):
         planes = [int(width_per_group * groups * 2**i) for i in range(4)]
         self.inplanes = planes[0]
         self.conv1 = nn.Conv2d(
-            12, planes[0], kernel_size=7, stride=2, padding=3, bias=False
+            3, planes[0], kernel_size=7, stride=2, padding=3, bias=False
         )
         self.bn1 = norm_layer(planes[0])
         self.relu = nn.ReLU(inplace=True)
@@ -527,5 +527,6 @@ def resnet18_basenet(pretrained=False, **kwargs):
                 "https://download.pytorch.org/models/resnet18-5c106cde.pth"
             )
         )
+    model.conv1 = nn.Conv2d(12, 64, 7, 2, 3, bias=False)
     model.fc = nn.Sequential()
     return model
