@@ -81,6 +81,7 @@ class Bigearthnet(Dataset):
             channels.append(ch)   
         img = np.dstack(channels)
         img = torch.from_numpy(img)
+        img = torch.permute(img, (2, 0, 1))
 
         if self.transform is not None:
             img = self.transform(img)
