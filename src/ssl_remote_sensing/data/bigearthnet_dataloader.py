@@ -31,7 +31,7 @@ class BigearthnetDataModule(LightningDataModule):
     @staticmethod
     def train_transform():
         return transforms.Compose([
-            transforms.Resize((64, 64)),
+            transforms.RandomCrop((64, 64)),
             transforms.ToTensor()
         ])
 
