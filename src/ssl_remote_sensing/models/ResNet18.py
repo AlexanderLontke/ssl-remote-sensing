@@ -124,12 +124,12 @@ class DecoderBlock(nn.Module):
 
 
 class ResNetEncoder(nn.Module):
-    def __init__(self, block, layers):
+    def __init__(self, block, layers, channels: int = 3):
         super().__init__()
 
         self.inplanes = 64
         self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
+            channels, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
         )
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -239,8 +239,8 @@ class ResNetDecoder(nn.Module):
 
 
 # encoder
-def resnet18_encoder():
-    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2])
+def resnet18_encoder(channels:int =3):
+    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], channels=channels)
 
 
 # decoder

@@ -11,7 +11,7 @@ class AddProjection(nn.Module):
     def __init__(self, config, mlp_dim=512):
         super(AddProjection, self).__init__()
         embedding_size = config.embedding_size
-        self.backbone = resnet18_encoder()
+        self.backbone = resnet18_encoder(channels=config.in_channels)
 
         # add mlp projection head
         self.projection = nn.Sequential(
