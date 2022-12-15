@@ -2,7 +2,7 @@ from torch import nn
 import torchvision.transforms as T
 
 
-class AugmentTest:
+class Augment:
     """
     a probabilistic data augmentation module
     Transforms any given data example randomly
