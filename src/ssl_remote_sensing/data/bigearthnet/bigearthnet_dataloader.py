@@ -4,7 +4,7 @@ from typing import Optional
 
 from torch import nn
 from torch.utils.data import DataLoader
-from ssl_remote_sensing.data.bigearthnet.bigearthnet_dataset import Bigearthnet
+from ssl_remote_sensing.data.bigearthnet.bigearthnet_in_memory_dataset import InMemoryBigearthnet
 
 
 def get_bigearthnet_dataloader(
@@ -13,7 +13,7 @@ def get_bigearthnet_dataloader(
     num_workers: Optional[int] = None,
     dataset_transform: Optional[nn.Module] = None,
 ):
-    bigearthnet_dataset = Bigearthnet(
+    bigearthnet_dataset = InMemoryBigearthnet(
         dataset_dir=data_dir,
         transform=dataset_transform,
     )
