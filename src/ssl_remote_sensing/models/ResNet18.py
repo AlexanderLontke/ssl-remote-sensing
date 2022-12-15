@@ -512,15 +512,6 @@ class ResNet(nn.Module):
             ):
                 param_list.append(p[1])
         return param_list
-    
-    @staticmethod
-    def _weights_init(m):
-        classname = m.__class__.__name__
-        if classname.find("Conv") != -1:
-            nn.init.normal_(m.weight, 0.0, 0.02)
-        elif classname.find("BatchNorm") != -1:
-            nn.init.normal_(m.weight, 1.0, 0.02)
-            nn.init.zeros_(m.bias)
 
 
 def resnet18_basenet(pretrained=False, random_init=False, **kwargs):
@@ -529,6 +520,15 @@ def resnet18_basenet(pretrained=False, random_init=False, **kwargs):
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
 
+    @staticmethod
+    def _weights_init(m):
+        classname = m.__class__.__name__
+        if classname.find("Conv") != -1:
+            nn.init.normal_(m.weight, 0.0, 0.02)
+        elif classname.find("BatchNorm") != -1:
+            nn.init.normal_(m.weight, 1.0, 0.02)
+            nn.init.zeros_(m.bias)
+    
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
         model.load_state_dict(
@@ -540,5 +540,5 @@ def resnet18_basenet(pretrained=False, random_init=False, **kwargs):
     model.conv1 = nn.Conv2d(12, 64, 7, 2, 3, bias=False)
     model.fc = nn.Sequential()
     if random_init:
-        model._weights_init()
+        _weights_init(model)
     return model
