@@ -4,9 +4,9 @@ import pytorch_lightning as pl
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from torch.optim import SGD, Adam
 
-from pytorch_metric_learning.losses.ntxent_loss import NTXentLoss
 from ssl_remote_sensing.pretext_tasks.simclr.resnet_18_backbone import AddProjection
 from ssl_remote_sensing.pretext_tasks.simclr.utils import define_parameter_groups
+from ssl_remote_sensing.pretext_tasks.simclr.loss import nt_xent_loss
 
 
 class SimCLRTraining(pl.LightningModule):
@@ -14,16 +14,15 @@ class SimCLRTraining(pl.LightningModule):
         super().__init__()
         self.config = config
         self.model = AddProjection(config, mlp_dim=feat_dim)
-        self.loss = NTXentLoss(temperature=self.config.temperature)
 
     def forward(self, batch, *args, **kwargs) -> torch.Tensor:
         return self.model(batch)
 
     def training_step(self, batch, batch_idx, *args, **kwargs) -> torch.Tensor:
-        (x1, x2), labels = batch
+        (x1, x2) = batch
         z1 = self.model(x1)
         z2 = self.model(x2)
-        loss = self.loss(z1, z2)
+        loss = nt_xent_loss(z1, z2, self.config.temperature)
 
         self.log(
             "train/NTXentLoss",
