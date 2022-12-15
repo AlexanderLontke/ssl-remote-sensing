@@ -26,7 +26,7 @@ class InMemoryBigearthnet(Dataset):
         self.samples = glob.glob(os.path.join(dataset_dir, "*"))
         self.image_size = 120
         self.images = []
-        for path in tqdm(self.samples, desc="Loading samples"):
+        for path in tqdm(self.samples, desc="Loading samples")[:50]:
             patch_id = path.split("/")[-1]
 
             channels = []
