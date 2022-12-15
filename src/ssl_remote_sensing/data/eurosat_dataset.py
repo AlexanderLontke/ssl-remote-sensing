@@ -41,8 +41,34 @@ classes_to_label = {
 # all_images = np.array([np.array(dataset.__getitem__(i)[0]) for i in range(len(dataset))])
 # n, h, w, c = all_images.shape
 # means = [np.mean(all_images[:, :, :, i]) for i in range(c)]
-means = [87.81586935763889, 96.97416420717593, 103.98142336697049]
-stds = [51.67849701591506, 34.908630837585186, 29.465280593587384]
+means_tuple = (
+    1353.7269257269966,
+    1117.2022923538773,
+    1041.8847248444733,
+    946.5542548737702,
+    1199.1886644965277,
+    2003.0067999222367,
+    2374.008444688585,
+    2301.2204385489003,
+    732.1819500777633,
+    1820.6963775318286,
+    1118.2027229275175,
+    2599.7829373281975,
+)
+stds_tuple = (
+    65.29657739037496,
+    153.77375864458085,
+    187.69931299271406,
+    278.1246366855392,
+    227.92409611864002,
+    355.9331571735718,
+    455.13290021052626,
+    530.7795614455541,
+    98.92998227431653,
+    378.16138952053035,
+    303.10651348740964,
+    502.16376466306053
+)
 
 
 def euro_sat_target_transform(label_str: str) -> int:
@@ -68,10 +94,9 @@ class EuroSATDataset(Dataset):
 
         # Extract bands
         with rio.open(sample, "r") as d:
-            ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+            ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]
             image = d.read(ms_channels)
-            image = reshape_as_image(image)
-            image = image.astype(np.float)
+            image = torch.tensor(image.astype(np.float))
 
         # Extract label
         label = sample.split("/")[-1].split("_")[0]
