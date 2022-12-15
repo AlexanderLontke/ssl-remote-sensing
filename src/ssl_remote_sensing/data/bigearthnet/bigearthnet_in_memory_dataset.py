@@ -48,7 +48,7 @@ class InMemoryBigearthnet(Dataset):
             self.images += [img]
 
     def __getitem__(self, index):
-        return self.images[index], "unlabeled"
+        return self.images[index]
 
     def __len__(self):
         return len(self.samples)
