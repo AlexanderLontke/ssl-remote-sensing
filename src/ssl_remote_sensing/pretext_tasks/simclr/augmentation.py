@@ -2,7 +2,7 @@ from torch import nn
 import torchvision.transforms as T
 
 
-class Augment:
+class AugmentTest:
     """
     a probabilistic data augmentation module
     Transforms any given data example randomly
@@ -28,12 +28,12 @@ class Augment:
                 # Flip image horizontally with 50% probability
                 T.RandomHorizontalFlip(p=0.5),
                 # Apply heavy color jitter with 80% probability
-                T.RandomApply([color_jitter], p=0.8),
+                # T.RandomApply([color_jitter], p=0.8),
                 # Apply gaussian blur with 50% probability
                 T.RandomApply([blur], p=0.5),
                 # Convert RGB images to grayscale with 20% probability
-                T.RandomGrayscale(p=0.2),
-                T.ToTensor(),
+                # T.RandomGrayscale(p=0.2),
+                # T.ToTensor(),
                 normalizer,
             ]
         )
