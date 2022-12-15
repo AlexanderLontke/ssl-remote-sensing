@@ -38,7 +38,7 @@ class BIGAN(LightningModule):
         self.latent_dim = latent_dim
         self.learning_rate = learning_rate
         self.batch_size = batch_size
-        self.pretrained_model = resnet18_basenet(pretrained=True)
+        self.pretrained_model = resnet18_basenet(pretrained=False, random_init=True)
 
         self.generator = self._get_generator()
         self.discriminator = self._get_discriminator()

@@ -512,9 +512,18 @@ class ResNet(nn.Module):
             ):
                 param_list.append(p[1])
         return param_list
+    
+    @staticmethod
+    def _weights_init(m):
+        classname = m.__class__.__name__
+        if classname.find("Conv") != -1:
+            nn.init.normal_(m.weight, 0.0, 0.02)
+        elif classname.find("BatchNorm") != -1:
+            nn.init.normal_(m.weight, 1.0, 0.02)
+            nn.init.zeros_(m.bias)
 
 
-def resnet18_basenet(pretrained=False, **kwargs):
+def resnet18_basenet(pretrained=False, random_init=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -527,6 +536,9 @@ def resnet18_basenet(pretrained=False, **kwargs):
                 "https://download.pytorch.org/models/resnet18-5c106cde.pth"
             )
         )
+        
     model.conv1 = nn.Conv2d(12, 64, 7, 2, 3, bias=False)
     model.fc = nn.Sequential()
+    if random_init:
+        model._weights_init()
     return model
