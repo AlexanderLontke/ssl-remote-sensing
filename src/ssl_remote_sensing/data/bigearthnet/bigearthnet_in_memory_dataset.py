@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from typing import Optional
 
 import numpy as np
 import rasterio
@@ -20,10 +21,12 @@ def normalize(img, mean, std):
 
 
 class InMemoryBigearthnet(Dataset):
-    def __init__(self, dataset_dir, bands=ALL_BANDS, transform=None):
+    def __init__(self, dataset_dir, bands=ALL_BANDS, transform=None, max_samples: Optional[int] = None):
         self.bands = bands
         self.transform = transform
         self.samples = glob.glob(os.path.join(dataset_dir, "*"))
+        if max_samples:
+            self.samples = self.samples[:max_samples]
         self.image_size = 120
         self.images = []
         for path in tqdm(self.samples, desc="Loading samples"):

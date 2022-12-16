@@ -12,10 +12,12 @@ def get_bigearthnet_dataloader(
     batch_size: int,
     num_workers: Optional[int] = None,
     dataset_transform: Optional[nn.Module] = None,
+    max_samples: Optional[int] = None
 ):
     bigearthnet_dataset = InMemoryBigearthnet(
         dataset_dir=data_dir,
         transform=dataset_transform,
+        max_samples=max_samples,
     )
     if not num_workers:
         num_workers = os.cpu_count()
