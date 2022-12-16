@@ -181,12 +181,13 @@ class ResNetEncoder(nn.Module):
 class ResNetDecoder(nn.Module):
     """Resnet in reverse order."""
 
-    def __init__(self, block, layers, latent_dim, input_height):
+    def __init__(self, block, layers, latent_dim, input_height,channels = 13):
         super().__init__()
 
         self.expansion = block.expansion
         self.inplanes = 512 * block.expansion
         self.input_height = input_height
+        self.channels = 13
 
         self.upscale_factor = 8
 
@@ -244,12 +245,12 @@ class ResNetDecoder(nn.Module):
 
 # encoder
 def resnet18_encoder():
-    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2])
+    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2],channels = 13)
 
 
 # decoder
 def resnet18_decoder(latent_dim, input_height):
-    return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim, input_height)
+    return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim, input_height,channels = 13)
 
 class BasicBlock(nn.Module):
     expansion = 1
