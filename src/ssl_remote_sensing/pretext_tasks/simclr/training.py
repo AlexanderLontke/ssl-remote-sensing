@@ -4,9 +4,9 @@ import pytorch_lightning as pl
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 from torch.optim import SGD, Adam
 
-from info_nce import InfoNCE
 from ssl_remote_sensing.pretext_tasks.simclr.resnet_18_backbone import AddProjection
 from ssl_remote_sensing.pretext_tasks.simclr.utils import define_parameter_groups
+from ssl_remote_sensing.pretext_tasks.simclr.loss import ContrastiveLoss
 
 
 class SimCLRTraining(pl.LightningModule):
@@ -14,20 +14,19 @@ class SimCLRTraining(pl.LightningModule):
         super().__init__()
         self.config = config
         self.model = AddProjection(config, mlp_dim=feat_dim)
-
-        self.loss = InfoNCE(temperature=self.config.temperature)
+        self.loss = ContrastiveLoss(batch_size=config.batch_size, temperature=self.config.temperature)
 
     def forward(self, batch, *args, **kwargs) -> torch.Tensor:
         return self.model(batch)
 
     def training_step(self, batch, batch_idx, *args, **kwargs) -> torch.Tensor:
-        (x1, x2), labels = batch
+        (x1, x2) = batch
         z1 = self.model(x1)
         z2 = self.model(x2)
         loss = self.loss(z1, z2)
 
         self.log(
-            "train/InfoNCE",
+            "train/NTXentLoss",
             loss,
             on_step=True,
             on_epoch=True,

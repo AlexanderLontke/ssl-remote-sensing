@@ -124,13 +124,14 @@ class DecoderBlock(nn.Module):
 
 
 class ResNetEncoder(nn.Module):
-    def __init__(self, block, layers):
+    def __init__(self, block, layers, channels: int = 3):
         super().__init__()
 
         self.inplanes = 64
         ### channel to be changed
+        self.channels = channels
         self.conv1 = nn.Conv2d(
-            13, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
+            channels, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
         )
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -141,6 +142,7 @@ class ResNetEncoder(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        
         # self.fc = nn.Sequential()
 
     def _make_layer(self, block, planes, blocks, stride=1):
@@ -202,7 +204,7 @@ class ResNetDecoder(nn.Module):
 
         ### channel to be changed
         self.conv1 = nn.Conv2d(
-            64 * block.expansion, 13, kernel_size=3, stride=1, padding=1, bias=False
+            64 * block.expansion, self.channels, kernel_size=3, stride=1, padding=1, bias=False
         )
 
     def _make_layer(self, block, planes, blocks, scale=1):
@@ -243,6 +245,7 @@ class ResNetDecoder(nn.Module):
 # encoder
 def resnet18_encoder():
     return ResNetEncoder(EncoderBlock, [2, 2, 2, 2])
+
 
 # decoder
 def resnet18_decoder(latent_dim, input_height):
