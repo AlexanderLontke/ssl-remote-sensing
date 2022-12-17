@@ -201,7 +201,7 @@ class ResNetDecoder(nn.Module):
 
         ### channel to be changed
         self.conv1 = nn.Conv2d(
-            64 * block.expansion, 13, kernel_size=3, stride=1, padding=1, bias=False
+            64 * block.expansion, 12, kernel_size=3, stride=1, padding=1, bias=False
         )
 
     def _make_layer(self, block, planes, blocks, scale=1):
