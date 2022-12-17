@@ -5,6 +5,17 @@ import glob
 import torch.utils.data as data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import torch
+import torchvision.transforms as T
+from typing import Union, Callable
+
+means = [0.1234, 0.0996, 0.0902, 0.0750, 0.0965, 0.1628, 0.1915, 0.1875, 0.2088,
+        0.0708, 0.1413, 0.0873]
+stds = [0.0195, 0.0260, 0.0299, 0.0453, 0.0472, 0.0878, 0.1105, 0.1125, 0.1234,
+        0.0511, 0.0943, 0.0714]
+
+def get_dfc2020_normalizer():
+    return T.Normalize(mean=means, std=stds)
 
 
 class DFC2020(data.Dataset):
@@ -19,11 +30,14 @@ class DFC2020(data.Dataset):
         use_s2mr=False,
         use_s2lr=False,
         use_s1=False,
+        transform: Union[Callable, None] = None
     ):
         """Initialize the dataset"""
 
         # inizialize
         super(DFC2020, self).__init__()
+
+        self.transform = transform
 
         # make sure parameters are okay
         if not (use_s2hr or use_s2mr or use_s2lr or use_s1):
@@ -84,7 +98,7 @@ class DFC2020(data.Dataset):
 
         # get and load sample from index file
         sample = self.samples[index]
-        return load_sample(
+        sample_loaded = load_sample(
             sample,
             self.use_s1,
             self.use_s2hr,
@@ -92,7 +106,10 @@ class DFC2020(data.Dataset):
             self.use_s2lr,
             no_savanna=self.no_savanna,
             igbp=False,
+            augmentation = self.augmentation
         )
+        sample_loaded["image"] = self.transform(sample_loaded["image"])
+        return sample_loaded
 
     def __len__(self):
         """Get number of samples in the dataset"""
@@ -132,7 +149,6 @@ class DFC2020(data.Dataset):
         axs[1].axis("off")
 
         plt.show()
-
 
 # mapping from igbp to dfc2020 classes
 DFC2020_CLASSES = [
