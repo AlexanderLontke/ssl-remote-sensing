@@ -96,7 +96,7 @@ def load_encoder_checkpoint_from_pretext_model(
     elif (
         path_to_checkpoint == "/content/drive/MyDrive/deep_learning_checkpoints/random"
     ):
-        return resnet18_encoder(channels = 12)
+        return resnet18_encoder(channels = 12) 
 
     else:
         raise ValueError(
