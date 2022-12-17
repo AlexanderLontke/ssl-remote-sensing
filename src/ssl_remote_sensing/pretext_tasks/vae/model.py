@@ -7,7 +7,7 @@ class VariationalAutoencoder(nn.Module):
     def __init__(self, enc_out_dim=512, latent_dim=None, input_height=64, config=None):
         super().__init__()
 
-        self.encoder = resnet18_encoder()
+        self.encoder = resnet18_encoder(channels = 12)
         self.decoder = resnet18_decoder(
             latent_dim=latent_dim, input_height=input_height
         )

@@ -244,8 +244,8 @@ class ResNetDecoder(nn.Module):
 
 
 # encoder
-def resnet18_encoder():
-    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2],channels = 12)
+def resnet18_encoder(channels:int =3):
+    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], channels=channels)
 
 
 # decoder
