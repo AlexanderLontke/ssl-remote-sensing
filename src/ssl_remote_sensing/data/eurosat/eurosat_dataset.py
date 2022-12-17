@@ -99,7 +99,7 @@ class EuroSATDataset(Dataset):
 
         # Extract bands
         with rio.open(sample, "r") as d:
-            ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]
+            ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13]
             image = d.read(ms_channels)
             image = torch.tensor(image.astype(float))
             image = image.float()
