@@ -24,7 +24,7 @@ class Bigearthnet(Dataset):
         self.bands = bands
         self.transform = transform
         self.samples = glob.glob(os.path.join(dataset_dir, "*"))
-        self.image_size = 120
+        self.image_size = 128
 
     def __getitem__(self, index):
         path = self.samples[index]
