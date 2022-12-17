@@ -106,10 +106,12 @@ class DFC2020(data.Dataset):
             self.use_s2lr,
             no_savanna=self.no_savanna,
             igbp=False,
-            augmentation = self.augmentation
         )
-        sample_loaded["image"] = self.transform(sample_loaded["image"])
-        return sample_loaded
+        if self.transform:
+            sample_loaded["image"] = self.transform(np.transpose(sample_loaded["image"], (1, 2, 0)))
+            return sample_loaded
+        else:
+            return sample_loaded
 
     def __len__(self):
         """Get number of samples in the dataset"""
