@@ -45,7 +45,7 @@ class BigearthnetDataModule(LightningDataModule):
     def default_transform():
         return transforms.Compose(
             [
-                transforms.RandomCrop(64),
+                # transforms.RandomCrop(64),
             ]
         )
 
