@@ -102,6 +102,7 @@ class EuroSATDataset(Dataset):
             ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]
             image = d.read(ms_channels)
             image = torch.tensor(image.astype(np.float))
+            image = image.float()
 
         # Extract label
         label = sample.split("/")[-1].split("_")[0]
