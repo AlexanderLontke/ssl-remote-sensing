@@ -66,6 +66,7 @@ class LinearBlock(nn.Module):
         """
         super().__init__()
         self.fc1 = nn.Linear(input_dim, output_dim)
+        self.norm = nn.BatchNorm1d(num_features=output_dim)
 
     def forward(self, x):
         """
@@ -73,7 +74,7 @@ class LinearBlock(nn.Module):
         :param x: List of image samples
         :return:
         """
-        return nn.BatchNorm1d(self.fc1(x))
+        return self.norm(self.fc1(x))
 
 
 class DownstreamClassificationNet(nn.Module):
