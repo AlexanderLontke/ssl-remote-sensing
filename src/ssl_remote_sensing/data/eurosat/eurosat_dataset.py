@@ -84,8 +84,8 @@ class EuroSATDataset(Dataset):
     def __init__(
         self,
         dataset_dir: str,
-        transform: Union[Callable, None],
-        target_transform: Union[Callable, None],
+        transform: Union[Callable, None] = None,
+        target_transform: Union[Callable, None] = None,
     ):
         self.samples = glob(os.path.join(dataset_dir, "*", "*.tif"))
         self.transform = transform
