@@ -46,7 +46,7 @@ def load_encoder_checkpoint_from_pretext_model(
     elif (
         path_to_checkpoint == "/content/drive/MyDrive/deep_learning_checkpoints/random"
     ):
-        return resnet18_encoder()
+        return resnet18_encoder(channels = 12) 
     else:
         raise ValueError(
             f"Checkpoint name has to contain simclr, vae, or bigan but was {path_to_checkpoint}"
