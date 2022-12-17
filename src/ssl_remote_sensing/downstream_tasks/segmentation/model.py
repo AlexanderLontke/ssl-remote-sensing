@@ -17,12 +17,15 @@ def convrelu(in_channels, out_channels, kernel, padding):
 
 
 class ResNetUNet(nn.Module):
-    def __init__(self, n_class, encoder=None, gan_encoder=False):
+    def __init__(self, n_class, encoder=None, gan_encoder=False, in_channels = 12):
         super().__init__()
 
         # test base mode: pretrained resnet 18 of imagenet
         # self.base_model = torchvision.models.resnet18(pretrained=True)
         # base model from our pre-trained model
+
+        self.in_channels = in_channels
+
         self.base_model = encoder
         if gan_encoder:
             self.base_layers = list(list(self.base_model.children())[0].children())
@@ -50,7 +53,7 @@ class ResNetUNet(nn.Module):
         self.conv_up0 = convrelu(64 + 256, 128, 3, 1)
 
         # from 3 to 13
-        self.conv_original_size0 = convrelu(13, 64, 3, 1)
+        self.conv_original_size0 = convrelu(in_channels, 64, 3, 1)
         self.conv_original_size1 = convrelu(64, 64, 3, 1)
         self.conv_original_size2 = convrelu(64 + 128, 64, 3, 1)
 
