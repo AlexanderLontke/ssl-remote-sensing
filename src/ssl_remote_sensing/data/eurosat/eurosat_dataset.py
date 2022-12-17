@@ -3,6 +3,7 @@ import os
 from typing import Union, Callable
 from glob import glob
 import rasterio as rio
+from tqdm import tqdm
 from rasterio.plot import reshape_as_image
 import torch
 from torch.utils.data import Dataset
@@ -158,3 +159,40 @@ class EuroSATDataset(Dataset):
         else:
             label = euro_sat_target_transform(label)
         return image, label
+
+
+class InMemoryEuroSATDataset(Dataset):
+    def __init__(
+        self,
+        dataset_dir: str,
+        transform: Union[Callable, None] = None,
+        target_transform: Union[Callable, None] = None,
+    ):
+        self.samples = glob(os.path.join(dataset_dir, "*", "*.tif"))
+        self.transform = transform
+        self.target_transform = target_transform
+        self.images = []
+        for sample in tqdm(self.samples, desc="Loading Images"):
+            # Extract bands
+            with rio.open(sample, "r") as d:
+                ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13]
+                image = d.read(ms_channels)
+                image = torch.tensor(image.astype(float))
+                image = image.float()
+
+            # Extract label
+            label = sample.split("/")[-1].split("_")[0]
+
+            if self.transform:
+                image = self.transform(image)
+            if self.target_transform:
+                label = self.target_transform(label)
+            else:
+                label = euro_sat_target_transform(label)
+            self.images += [(image, label)]
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, index):
+        return self.images[index]

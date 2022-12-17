@@ -1,9 +1,12 @@
-from ssl_remote_sensing.data.eurosat.eurosat_dataset import EuroSATDataset
+from ssl_remote_sensing.data.eurosat.eurosat_dataset import EuroSATDataset, InMemoryEuroSATDataset
 from torch.utils.data import DataLoader, random_split
 
 
-def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False):
-    dataset = EuroSATDataset(root, transform=transform)
+def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False, in_memory: bool = False):
+    if in_memory:
+        dataset = InMemoryEuroSATDataset(root, transform=transform)
+    else:
+        dataset = EuroSATDataset(root, transform=transform)
     print("[LOG] Total number of images: {}".format(len(dataset)))
     print(f"[LOG] Batch size is {batchsize}")
 
