@@ -120,6 +120,27 @@ def get_metrics(true, preds):
     print("*******************************************")
 
 
+import os
+import torch
+import torch.nn as nn
+import random
+import wandb
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
+from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
+from sklearn.metrics import confusion_matrix, accuracy_score, jaccard_score
+from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
+from ssl_remote_sensing.models.ResNet18 import ResNetEncoder, resnet18_encoder
+from ssl_remote_sensing.pretext_tasks.simclr.config import get_simclr_config
+from ssl_remote_sensing.pretext_tasks.vae.config import get_vae_config
+from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
+from ssl_remote_sensing.pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
+from ssl_remote_sensing.models.ResNet18 import resnet18_basenet
+from ssl_remote_sensing.pretext_tasks.gan.config import get_bigan_config
+
+
 def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=None):
 
     if not idx:
@@ -138,24 +159,25 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
 
     mask = label.squeeze()
 
-    input_img = torch.from_numpy(img)
+    input_img = img.cpu().detach().numpy()
+    input_img = torch.from_numpy(input_img)
     input_img = torch.unsqueeze(input_img.float().to(device), 0)
     output = bst_model(input_img)
     output = torch.nn.functional.softmax(output, dim=1)
     output = torch.argmax(output, dim=1)
     output = output.to("cpu").squeeze(0).numpy()
 
-    # wandb log
-    img_log = wandb.Image(img_rgb, caption="Sentinel-2 RGB")
-    wandb.log({f"Sentinal-2 RGB: {model_name}": img_log})
-    mask_log = wandb.Image(
-        Image.fromarray(np.uint8(mask)).convert("RGB"), caption="Groundtruth Mask"
-    )
-    wandb.log({f"Groundtruth Mask: {model_name}": mask_log})
-    output_log = wandb.Image(
-        Image.fromarray(np.uint8(output)).convert("RGB"), caption="Predicted Mask"
-    )
-    wandb.log({f"Predicted Mask: {model_name}": output_log})
+    # # wandb log
+    # img_log = wandb.Image(img_rgb, caption="Sentinel-2 RGB")
+    # wandb.log({f"Sentinal-2 RGB: {model_name}": img_log})
+    # mask_log = wandb.Image(
+    #     Image.fromarray(np.uint8(mask)).convert("RGB"), caption="Groundtruth Mask"
+    # )
+    # wandb.log({f"Groundtruth Mask: {model_name}": mask_log})
+    # output_log = wandb.Image(
+    #     Image.fromarray(np.uint8(output)).convert("RGB"), caption="Predicted Mask"
+    # )
+    # wandb.log({f"Predicted Mask: {model_name}": output_log})
 
     axs[0].imshow(img_rgb)
     axs[0].set_title("Sentinel-2 RGB")

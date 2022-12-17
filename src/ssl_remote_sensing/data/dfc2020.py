@@ -9,6 +9,7 @@ import torch
 import torchvision.transforms as T
 from typing import Union, Callable
 
+
 means = [0.1234, 0.0996, 0.0902, 0.0750, 0.0965, 0.1628, 0.1915, 0.1875, 0.2088,
         0.0708, 0.1413, 0.0873]
 stds = [0.0195, 0.0260, 0.0299, 0.0453, 0.0472, 0.0878, 0.1105, 0.1125, 0.1234,
@@ -334,3 +335,14 @@ def get_display_channels(use_s2hr, use_s2mr, use_s2lr):
         display_channels = 0
         brightness_factor = 3
     return (display_channels, brightness_factor)
+
+# # https://www.binarystudy.com/2021/04/how-to-calculate-mean-standard-deviation-images-pytorch.html
+
+# def mean_std(loader):
+#   images  = next(iter(loader))["image"]
+#   # shape of images = [b,c,w,h]
+#   mean, std = images.mean([0,2,3]), images.std([0,2,3])
+#   return mean, std
+
+# mean, std = mean_std(train_loader_mean_sd)
+# print("mean and std: \n", mean, std)
