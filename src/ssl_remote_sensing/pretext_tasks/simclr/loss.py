@@ -4,6 +4,7 @@ import torch.nn.functional as F
 
 
 class ContrastiveLoss(nn.Module):
+    # https://zablo.net/blog/post/understanding-implementing-simclr-guide-eli5-pytorch/
     def __init__(self, batch_size, temperature=0.5):
         super().__init__()
         self.batch_size = batch_size
