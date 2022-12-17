@@ -44,7 +44,7 @@ def load_encoder_checkpoint_from_pretext_model(
         model.load_state_dict(state_dict_best)
         return model
     elif (
-        path_to_checkpoint == "/content/drive/MyDrive/deep_learning_checkpoints/random"
+        "random" in path_to_checkpoint
     ):
         return resnet18_encoder()
     else:
