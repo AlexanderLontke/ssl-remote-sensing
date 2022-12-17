@@ -160,7 +160,8 @@ DFC2020_CLASSES = [
 S2_BANDS_HR = [2, 3, 4, 8]
 S2_BANDS_MR = [5, 6, 7, 9, 12, 13]
 #S2_BANDS_LR = [1, 10, 11]
-S2_BANDS_LR = [1, 11]
+# Remove band 10
+S2_BANDS_LR = [1, 10]
 
 # util function for reading s2 data
 def load_s2(path, use_hr, use_mr, use_lr):
