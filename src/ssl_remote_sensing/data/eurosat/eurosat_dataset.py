@@ -101,7 +101,7 @@ class EuroSATDataset(Dataset):
         with rio.open(sample, "r") as d:
             ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]
             image = d.read(ms_channels)
-            image = torch.tensor(image.astype(torch.float))
+            image = torch.tensor(image.astype(np.float))
 
         # Extract label
         label = sample.split("/")[-1].split("_")[0]
