@@ -71,9 +71,53 @@ stds_tuple = (
     502.16376466306053
 )
 
+# def batch_mean_and_sd(loader):
+#     imgs = []
+#     for item in tqdm(loader.dataset):
+#       imgs += [item[0]] # item[0] and item[1] are image and its label
+#     imgs = torch.stack(imgs, dim=0).numpy()
+#     print(imgs.shape)
+#     b, c, h, w = imgs.shape
+#     m = []
+#     s = []
+#     for i in range(c):
+#         m += [imgs[:,i,:,:].mean()]
+#         s += [imgs[:,i,:,:].std()]
+#     return m, s
+
+train_means = [
+    1354.0996,
+    1117.529,
+    1042.4503,
+    946.56146,
+    1199.1011,
+    2005.2098,
+    2377.4353,
+    2304.2144,
+    731.7947,
+    12.091442,
+    1117.7218,
+    2603.26
+]
+
+train_stds = [
+    245.4707,
+    333.48648,
+    395.30338,
+    594.32806,
+    566.45123,
+    862.2661,
+    1089.3525,
+    1120.208,
+    403.872,
+    4.717908,
+    761.2879,
+    1234.1173
+]
+
 
 def get_eurosat_normalizer():
-    return T.Normalize(mean=means_tuple, std=stds_tuple)
+    return T.Normalize(mean=train_means, std=train_stds)
 
 
 def euro_sat_target_transform(label_str: str) -> int:
