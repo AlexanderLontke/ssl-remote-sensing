@@ -12,9 +12,9 @@ def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False, 
     print(f"[LOG] Batch size is {batchsize}")
 
     if split:
-        train_set, val_set = random_split(dataset, [21600, 5400])
         if max_samples != 21600:
-            train_set.images = [train_set.images[idx] for idx in random.sample(range(len(train_set)), max_samples)]
+            dataset.images = [dataset.images[idx] for idx in random.sample(range(len(dataset)), 5400 + max_samples)]
+        train_set, val_set = random_split(dataset, [max_samples, 5400])
         print(f"[LOG] Total images in the train set is: {len(train_set)}")
         train_loader = DataLoader(
             dataset=train_set,
