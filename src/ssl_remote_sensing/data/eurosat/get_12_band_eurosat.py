@@ -1,8 +1,9 @@
+import random
 from ssl_remote_sensing.data.eurosat.eurosat_dataset import EuroSATDataset, InMemoryEuroSATDataset
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, RandomSampler
 
 
-def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False, in_memory: bool = False):
+def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False, in_memory: bool = False, max_samples: int = 21600):
     if in_memory:
         dataset = InMemoryEuroSATDataset(root, transform=transform)
     else:
@@ -13,6 +14,8 @@ def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False, 
     if split:
         train_set, val_set = random_split(dataset, [21600, 5400])
         print(f"[LOG] Total images in the train set is: {len(train_set)}")
+        if max_samples != 21600:
+            train_set = RandomSampler(train_set, num_samples=max_samples)
         train_loader = DataLoader(
             dataset=train_set,
             batch_size=batchsize,
