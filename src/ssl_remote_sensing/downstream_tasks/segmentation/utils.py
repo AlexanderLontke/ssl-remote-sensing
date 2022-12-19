@@ -187,8 +187,10 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     axs[1].set_title("Groundtruth Mask")
     axs[1].axis("off")
 
-    axs[2].imshow(output)
-    axs[2].set_title("Predicted Mask")
-    axs[2].axis("off")
+    im_output = axs[2].imshow(output)
+    im_output.set_title("Predicted Mask")
+    im_output.axis("off")
+
+    fig.colorbar(im_output)
 
     plt.show()
