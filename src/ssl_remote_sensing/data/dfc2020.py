@@ -8,6 +8,8 @@ from tqdm import tqdm
 import torch
 import torchvision.transforms as T
 from typing import Union, Callable
+from mpl_toolkits.axes_grid1 import ImageGrid
+import matplotlib as mpl
 
 
 means = [0.1234, 0.0996, 0.0902, 0.0750, 0.0965, 0.1628, 0.1915, 0.1875, 0.2088,
@@ -135,23 +137,71 @@ class DFC2020(data.Dataset):
             "\n",
         )
 
-        fig, axs = plt.subplots(1, 2, figsize=(10, 6))
+        # fig, axs = plt.subplots(figsize=(10, 6))
+        # cmap = plt.cm.get_cmap('plasma')
 
+        
         img_rgb = img[[3, 2, 1], :, :]
         img_rgb = np.transpose(img_rgb, (1, 2, 0))
         img_rgb = img_rgb / img_rgb.max()
 
-        axs[0].imshow(img_rgb)
-        axs[0].set_title("Sentinel-2 RGB")
-        axs[0].axis("off")
+        # plt.subplot(121)
+        # im1 = plt.imshow(img_rgb)
+        # plt.title("Sentinel-2 RGB")
+        # im1.axis("off")
+        # axs[0].imshow(img_rgb)
+        # axs[0].set_title("Sentinel-2 RGB")
+        # axs[0].axis("off")
 
         mask = label.squeeze()
 
-        axs[1].imshow(mask)
-        axs[1].set_title("Groundtruth Mask")
-        axs[1].axis("off")
+        # axs2 = plt.subplot(122,cmap = cmap)
+        
+        # im2 = axs2.imshow(mask)
+        # plt.title("Groundtruth Mask")
 
-        plt.show()
+        # # axs1 = axs[1].imshow(mask)
+        # # axs[1].set_title("Groundtruth Mask")
+        # # axs[1].axis("off")
+
+        # sm = plt.cm.ScalarMappable(cmap=cmap)
+        # plt.colorbar(im2, ax =axs2,fraction=0.046, pad=0.04,cmap = sm)
+
+        # plt.show()
+
+        fig = plt.figure(figsize=(10, 6))
+        grid = ImageGrid(fig, 111,
+                        nrows_ncols = (1,2),
+                        axes_pad = 0.1,
+                        cbar_location = "right",
+                        cbar_mode="single",
+                        cbar_size="5%",
+                        cbar_pad=0.05
+                        )
+
+        grid[0].imshow(img_rgb)
+        grid[0].axis('off')
+        grid[0].set_title('Sentinel-2 RGB')
+
+        imc = grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
+        grid[1].axis('off')
+        grid[1].set_title('Groundtruth Mask')
+
+        cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=range(9))
+        cbar.set_ticklabels(DFC2020_LABELS)
+        # set ticks locations (not very elegant, but it works):
+# - shift by 0.5
+# - scale so that the last value is at the center of the last color
+        tick_locs = (np.arange(9) + 0.5)*(9-1)/9
+        cbar.set_ticks(tick_locs)
+        # plt.clim(-0.5, 8.5)
+
+        # # plot the results
+        # plt.scatter(projection[:, 0], projection[:, 1], lw=0.1,
+        #             c=digits.target, cmap=plt.cm.get_cmap('cubehelix', 6))
+        # plt.colorbar(ticks=range(6), label='digit value')
+        # plt.clim(-0.5, 5.5)
+
 
 # mapping from igbp to dfc2020 classes
 DFC2020_CLASSES = [
@@ -173,6 +223,18 @@ DFC2020_CLASSES = [
     8,
     9,
     10,
+]
+
+DFC2020_LABELS = [
+    "Forests", 
+    "Shrublands", 
+    "Grasslands",
+    "Wetlands",
+    "Croplands", 
+    "Urban & Built-Up Lands", 
+    "Permanent Snow & Ice", 
+    "Barren", 
+    "Water Bodies",
 ]
 
 # indices of sentinel-2 high-/medium-/low-resolution bands

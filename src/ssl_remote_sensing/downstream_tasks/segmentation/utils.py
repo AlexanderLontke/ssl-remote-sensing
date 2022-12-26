@@ -6,6 +6,7 @@ import wandb
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import ImageGrid
 from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
 from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
 from sklearn.metrics import confusion_matrix, accuracy_score, jaccard_score
@@ -17,6 +18,7 @@ from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
 from ssl_remote_sensing.pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
 from ssl_remote_sensing.models.ResNet18 import resnet18_basenet
 from ssl_remote_sensing.pretext_tasks.gan.config import get_bigan_config
+from ssl_remote_sensing.downstream_tasks.segmentation.constants import DFC2020_LABELS
 
 
 def best_model_loader(pretext_model, saved_model_path):
@@ -120,25 +122,7 @@ def get_metrics(true, preds):
     print("*******************************************")
 
 
-import os
-import torch
-import torch.nn as nn
-import random
-import wandb
-import numpy as np
-from PIL import Image
-import matplotlib.pyplot as plt
-from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
-from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
-from sklearn.metrics import confusion_matrix, accuracy_score, jaccard_score
-from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
-from ssl_remote_sensing.models.ResNet18 import ResNetEncoder, resnet18_encoder
-from ssl_remote_sensing.pretext_tasks.simclr.config import get_simclr_config
-from ssl_remote_sensing.pretext_tasks.vae.config import get_vae_config
-from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
-from ssl_remote_sensing.pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
-from ssl_remote_sensing.models.ResNet18 import resnet18_basenet
-from ssl_remote_sensing.pretext_tasks.gan.config import get_bigan_config
+
 
 
 def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=None):
@@ -178,19 +162,50 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     #     Image.fromarray(np.uint8(output)).convert("RGB"), caption="Predicted Mask"
     # )
     # wandb.log({f"Predicted Mask: {model_name}": output_log})
+    fig = plt.figure(figsize=(10, 6))
+    grid = ImageGrid(fig, 111,
+                        nrows_ncols = (1,3),
+                        axes_pad = 0.1,
+                        cbar_location = "right",
+                        cbar_mode="single",
+                        cbar_size="5%",
+                        cbar_pad=0.05
+                        )
 
-    axs[0].imshow(img_rgb)
-    axs[0].set_title("Sentinel-2 RGB")
-    axs[0].axis("off")
 
-    axs[1].imshow(mask)
-    axs[1].set_title("Groundtruth Mask")
-    axs[1].axis("off")
+    # sentinel-2
+    grid[0].imshow(img_rgb)
+    grid[0].axis('off')
+    grid[0].set_title('Sentinel-2 RGB')
 
-    im_output = axs[2].imshow(output)
-    im_output.set_title("Predicted Mask")
-    im_output.axis("off")
+    # ground truth
+    grid[1].imshow(mask)
+    grid[1].set_title('Groundtruth Mask')
+    grid[1].axis('off')
 
-    fig.colorbar(im_output)
+    # predicted mask
+    imc = grid[2].imshow(output, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
+    grid[2].axis('off')
+    grid[2].set_title('Predicted Mask')
+    
+    # color bar settings
+    cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=range(9))
+    cbar.set_ticklabels(DFC2020_LABELS)
+    tick_locs = (np.arange(9) + 0.5)*(9-1)/9
+    cbar.set_ticks(tick_locs)
+
+    # axs[0].imshow(img_rgb)
+    # axs[0].set_title("Sentinel-2 RGB")
+    # axs[0].axis("off")
+
+    # axs[1].imshow(mask)
+    # axs[1].set_title("Groundtruth Mask")
+    # axs[1].axis("off")
+
+    # im_output = axs[2].imshow(output)
+    # axs[2].set_title("Predicted Mask")
+    # axs[2].im_output.axis("off")
+
+    # fig.colorbar(im_output)
 
     plt.show()

@@ -17,7 +17,7 @@ def convrelu(in_channels, out_channels, kernel, padding):
 
 
 class ResNetUNet(nn.Module):
-    def __init__(self, n_class, encoder=None, gan_encoder=False, in_channels = 12):
+    def __init__(self, n_class, in_channels = None, encoder=None, gan_encoder=False):
         super().__init__()
 
         # test base mode: pretrained resnet 18 of imagenet
