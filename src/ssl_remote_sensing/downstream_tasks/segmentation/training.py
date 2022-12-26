@@ -3,6 +3,9 @@ import torch
 import wandb
 from torchmetrics import Accuracy
 from torchmetrics.functional.classification import multiclass_jaccard_index
+import pandas as pd
+import numpy as np
+from ssl_remote_sensing.downstream_tasks.segmentation.constants import DFC2020_LABELS
 
 
 def train(
@@ -26,17 +29,21 @@ def train(
     # Create lists for logging losses and evalualtion metrics:
     train_losses = []
     train_accs = []
+    train_accs_perclass = []
     train_ious = []
 
     val_losses = []
     val_accs = []
+    val_accs_perclass = []
     val_ious = []
+
 
     # IoU
     # jaccard = JaccardIndex(task="multiclass", num_classes=9).to(device)
 
     # accuracy
     accuracy = Accuracy(task="multiclass", num_classes=9).to(device)
+    accuracy_perclass = Accuracy(task="multiclass", num_classes=9,average = None).to(device)
 
     # For every epoch
     for epoch in range(train_config.epochs):
@@ -57,6 +64,9 @@ def train(
         epoch_train_accs = 0
         epoch_val_accs = 0
 
+        epoch_train_accs_class = []
+        epoch_val_accs_class = []
+
         for i, batch in progress:
             # Transfer data to GPU if available
             data = batch["image"].float().to(device)
@@ -64,16 +74,24 @@ def train(
 
             # Make a forward pass
             output = model(data)
+            output_multi = torch.nn.functional.softmax(output, dim=1)
+            output_multi = torch.argmax(output_multi, dim=1)
 
             # Compute IoU
             epoch_train_ious += multiclass_jaccard_index(
-                output.to(device), label.int(), num_classes=9
+                output_multi.to(device), label, num_classes=9
             ) / len(train_loader)
 
             # Compute pixel accuracies
-            epoch_train_accs += accuracy(output.to(device), label.int()) / len(
+            epoch_train_accs += accuracy(output_multi.to(device), label.int()) / len(
                 train_loader
             )
+
+            # Compute class-wise pixel accuracies
+            train_acc_class = accuracy_perclass(output_multi.to(device), label.int()) / len(
+                train_loader
+            )
+            epoch_train_accs_class = [sum(x) for x in zip(train_acc_class,epoch_train_accs_class)]
 
             # Compute the loss
             loss = loss_fn(output, label)
@@ -115,16 +133,25 @@ def train(
 
                 # Make a forward pass
                 output = model(data)
+                output_multi = torch.nn.functional.softmax(output, dim=1)
+                output_multi = torch.argmax(output_multi, dim=1)
+                
 
                 # Compute IoU
                 epoch_val_ious += multiclass_jaccard_index(
-                    output.to(device), label.int(), num_classes=9
+                    output_multi.to(device), label, num_classes=9
                 ) / len(val_loader)
 
                 # Compute pixel accuracies
-                epoch_val_accs += accuracy(output.to(device), label.int()) / len(
+                epoch_val_accs += accuracy(output_multi.to(device), label.int()) / len(
                     val_loader
                 )
+
+                # Compute class-wise pixel accuracies
+                val_acc_class = accuracy_perclass(output_multi.to(device), label.int()) / len(
+                    val_loader
+                )
+                epoch_val_accs_class = [sum(x) for x in zip(val_acc_class,epoch_val_accs_class)]
 
                 # Compute the loss
                 val_loss = loss_fn(output, label)
@@ -170,5 +197,17 @@ def train(
         train_accs.append(epoch_train_accs.cpu().detach().numpy())
         val_accs.append(epoch_val_accs.cpu().detach().numpy())
         print(f"train_acc is {epoch_train_accs:.4f}, val_acc is {epoch_val_accs:.4f}")
+
+        # Save accuracies per class in list, so that we can visualise them later.
+        train_accs_perclass.append(epoch_train_accs_class.cpu().detach().numpy())
+        val_accs_perclass.append(epoch_val_accs_class.cpu().detach().numpy())
+
+        # Test print
+        print(f"\ntrain acc per class is {epoch_train_accs_class:.4f}, val acc per class is {epoch_val_accs_class:.4f}")
+
+    # Create table for accuracies per class
+    table_accs_class = wandb.Table(columns = DFC2020_LABELS, data = np.array(train_accs_perclass))
+    # table_accs_class.index = [print(f"Epoch {x}") for x in range(train_config.epochs+1)]
+    wandb.log({"Accuracy per class": table_accs_class})
 
     print("Finished Training")

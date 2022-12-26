@@ -1,11 +1,11 @@
 # Model Setup
 class Hparams:
     def __init__(self):
-        self.pretext_epochs = 50  # number of training epochs for pretext tasks
-        self.seed = 1234  # randomness seed
+        self.pretext_epochs = 30 # number of training epochs for pretext tasks
+        self.seed = 42  # randomness seed
         # self.save = "./saved_models/"
         # self.gradient_accumulation_steps = 1  # gradient accumulation steps
-        self.batch_size = 16
+        self.batch_size = 32
         self.lr = 1e-3
         # self.weight_decay = 1e-6
         self.latent_dim = 256

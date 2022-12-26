@@ -13,7 +13,7 @@ class VariationalAutoencoder(pl.LightningModule):
         self.config = config
 
         # encoder, decoder
-        self.encoder = resnet18_encoder()
+        self.encoder = resnet18_encoder(channels = 12)
         self.decoder = resnet18_decoder(
               latent_dim=latent_dim,
               input_height=input_height,

@@ -10,6 +10,8 @@ import torchvision.transforms as T
 from typing import Union, Callable
 from mpl_toolkits.axes_grid1 import ImageGrid
 import matplotlib as mpl
+import torchvision.transforms as transforms
+
 
 
 means = [0.1234, 0.0996, 0.0902, 0.0750, 0.0965, 0.1628, 0.1915, 0.1875, 0.2088,
@@ -112,6 +114,14 @@ class DFC2020(data.Dataset):
         )
         if self.transform:
             sample_loaded["image"] = self.transform(np.transpose(sample_loaded["image"], (1, 2, 0)))
+
+            trasnform_resize = transforms.Compose([
+                transforms.ToTensor(), 
+                transforms.Resize([128,128]),
+                ])
+
+            sample_loaded["label"] = trasnform_resize(sample_loaded["label"])
+            sample_loaded["label"] = np.squeeze(sample_loaded["label"] )
             return sample_loaded
         else:
             return sample_loaded
@@ -137,37 +147,11 @@ class DFC2020(data.Dataset):
             "\n",
         )
 
-        # fig, axs = plt.subplots(figsize=(10, 6))
-        # cmap = plt.cm.get_cmap('plasma')
-
-        
         img_rgb = img[[3, 2, 1], :, :]
         img_rgb = np.transpose(img_rgb, (1, 2, 0))
         img_rgb = img_rgb / img_rgb.max()
 
-        # plt.subplot(121)
-        # im1 = plt.imshow(img_rgb)
-        # plt.title("Sentinel-2 RGB")
-        # im1.axis("off")
-        # axs[0].imshow(img_rgb)
-        # axs[0].set_title("Sentinel-2 RGB")
-        # axs[0].axis("off")
-
         mask = label.squeeze()
-
-        # axs2 = plt.subplot(122,cmap = cmap)
-        
-        # im2 = axs2.imshow(mask)
-        # plt.title("Groundtruth Mask")
-
-        # # axs1 = axs[1].imshow(mask)
-        # # axs[1].set_title("Groundtruth Mask")
-        # # axs[1].axis("off")
-
-        # sm = plt.cm.ScalarMappable(cmap=cmap)
-        # plt.colorbar(im2, ax =axs2,fraction=0.046, pad=0.04,cmap = sm)
-
-        # plt.show()
 
         fig = plt.figure(figsize=(10, 6))
         grid = ImageGrid(fig, 111,

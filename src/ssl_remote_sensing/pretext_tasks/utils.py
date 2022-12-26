@@ -20,14 +20,17 @@ def load_encoder_checkpoint_from_pretext_model(
         ).model.backbone
     elif "vae" in path_to_checkpoint.lower():
 
-        best_model = VariationalAutoencoder(
-            latent_dim=get_vae_config().latent_dim, config=get_vae_config()
-        )
-        state_dict_best = torch.load(
-            path_to_checkpoint, map_location=torch.device("cpu")
-        )
-        best_model.load_state_dict(state_dict_best)
-        return best_model.encoder
+        return VariationalAutoencoder.load_from_checkpoint(
+           path_to_checkpoint,latent_dim =256,input_height=128, config= get_vae_config()).encoder
+
+        # best_model = VariationalAutoencoder(
+        #     latent_dim=get_vae_config().latent_dim, config=get_vae_config()
+        # )
+        # state_dict_best = torch.load(
+        #     path_to_checkpoint, map_location=torch.device("cpu")
+        # )
+        # best_model.load_state_dict(state_dict_best)
+        # return best_model.encoder
 
     elif "bigan" in path_to_checkpoint.lower():
         resnet_basemodel = resnet18_basenet(False)

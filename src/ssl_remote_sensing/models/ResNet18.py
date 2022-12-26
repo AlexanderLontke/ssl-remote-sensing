@@ -244,12 +244,12 @@ class ResNetDecoder(nn.Module):
 
 
 # encoder
-def resnet18_encoder(channels:int =3):
+def resnet18_encoder(channels:int =12):
     return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], channels=channels)
 
 
 # decoder
-def resnet18_decoder(latent_dim, input_height):
+def resnet18_decoder(latent_dim, input_height, channels: int = 12):
     return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim, input_height,channels = 12)
 
 class BasicBlock(nn.Module):

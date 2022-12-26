@@ -135,7 +135,7 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     img = sample["image"]
     label = sample["label"]
 
-    fig, axs = plt.subplots(1, 3, figsize=(10, 6))
+    # fig, axs = plt.subplots(1, 3, figsize=(10, 6))
 
     img_rgb = img[[3, 2, 1], :, :]
     img_rgb = np.transpose(img_rgb, (1, 2, 0))
@@ -179,7 +179,8 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     grid[0].set_title('Sentinel-2 RGB')
 
     # ground truth
-    grid[1].imshow(mask)
+    # grid[1].imshow(mask)
+    imc_gt = grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
     grid[1].set_title('Groundtruth Mask')
     grid[1].axis('off')
 
@@ -208,4 +209,4 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
 
     # fig.colorbar(im_output)
 
-    plt.show()
+    # plt.show()
