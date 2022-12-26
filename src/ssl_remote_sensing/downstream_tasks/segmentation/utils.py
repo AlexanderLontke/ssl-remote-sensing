@@ -180,7 +180,7 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
 
     # ground truth
     # grid[1].imshow(mask)
-    imc_gt = grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
+    grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
     grid[1].set_title('Groundtruth Mask')
     grid[1].axis('off')
 
@@ -209,4 +209,4 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
 
     # fig.colorbar(im_output)
 
-    # plt.show()
+    plt.show()
