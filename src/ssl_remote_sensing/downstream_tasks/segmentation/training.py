@@ -64,8 +64,8 @@ def train(
         epoch_train_accs = 0
         epoch_val_accs = 0
 
-        epoch_train_accs_class = []
-        epoch_val_accs_class = []
+        epoch_train_accs_class = [0] * 9
+        epoch_val_accs_class = [0] * 9
 
         for i, batch in progress:
             # Transfer data to GPU if available
@@ -91,7 +91,9 @@ def train(
             train_acc_class = accuracy_perclass(output_multi.to(device), label.int()) / len(
                 train_loader
             )
+            # print("Debug: ", train_acc_class)
             epoch_train_accs_class = [sum(x) for x in zip(train_acc_class,epoch_train_accs_class)]
+            # print("Debug: ", epoch_train_accs_class)
 
             # Compute the loss
             loss = loss_fn(output, label)
@@ -198,16 +200,20 @@ def train(
         val_accs.append(epoch_val_accs.cpu().detach().numpy())
         print(f"train_acc is {epoch_train_accs:.4f}, val_acc is {epoch_val_accs:.4f}")
 
-        # Save accuracies per class in list, so that we can visualise them later.
-        train_accs_perclass.append(epoch_train_accs_class.cpu().detach().numpy())
-        val_accs_perclass.append(epoch_val_accs_class.cpu().detach().numpy())
-
         # Test print
-        print(f"\ntrain acc per class is {epoch_train_accs_class:.4f}, val acc per class is {epoch_val_accs_class:.4f}")
+        epoch_train_accs_class = [x.cpu().detach() for x in epoch_train_accs_class]
+        epoch_val_accs_class = [x.cpu().detach() for x in epoch_val_accs_class]
+        # print(f"\ntrain acc per class is {epoch_train_accs_class}, \nval acc per class is {epoch_val_accs_class}")
+
+        # Save accuracies per class in list, so that we can visualise them later.
+        train_accs_perclass.append(epoch_train_accs_class)
+        val_accs_perclass.append(epoch_val_accs_class)
+
 
     # Create table for accuracies per class
-    table_accs_class = wandb.Table(columns = DFC2020_LABELS, data = np.array(train_accs_perclass))
+    train_table_accs_class = wandb.Table(columns = DFC2020_LABELS, data = np.array(train_accs_perclass))
+    val_table_accs_class = wandb.Table(columns = DFC2020_LABELS, data = np.array(val_accs_perclass))
     # table_accs_class.index = [print(f"Epoch {x}") for x in range(train_config.epochs+1)]
-    wandb.log({"Accuracy per class": table_accs_class})
+    wandb.log({"Train accuracy per class": train_table_accs_class, "Val accuracy per class": val_table_accs_class,})
 
     print("Finished Training")
