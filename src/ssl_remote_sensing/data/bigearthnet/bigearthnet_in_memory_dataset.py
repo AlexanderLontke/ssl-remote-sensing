@@ -15,8 +15,8 @@ from ssl_remote_sensing.data.bigearthnet.constants import ALL_BANDS, BAND_STATS
 def normalize(img, mean, std):
     min_value = mean - 2 * std
     max_value = mean + 2 * std
-    img = (img - min_value) / (max_value - min_value) * 255.0
-    img = np.clip(img, 0, 255).astype(np.uint8)
+    img = (img - min_value) / (max_value - min_value)
+    img = np.clip(img, 0, 1).astype(np.uint8)
     return img
 
 
@@ -40,8 +40,8 @@ class InMemoryBigearthnet(Dataset):
                     resampling=Resampling.bilinear,
                 )
                 # to range (0,1)
-                ch = np.clip(img, 0, 255).astype(np.uint8)/255
-                # ch = normalize(ch, mean=BAND_STATS["mean"][b], std=BAND_STATS["std"][b])
+                # ch = np.clip(img, 0, 255).astype(np.uint8)/255
+                ch = normalize(ch, mean=BAND_STATS["mean"][b], std=BAND_STATS["std"][b])
                 channels.append(ch)
             img = np.dstack(channels)
             img = torch.from_numpy(img)
