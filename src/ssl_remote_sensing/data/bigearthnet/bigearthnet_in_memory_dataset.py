@@ -39,7 +39,7 @@ class InMemoryBigearthnet(Dataset):
                     out_shape=(1, self.image_size, self.image_size),
                     resampling=Resampling.bilinear,
                 )
-                ch = normalize(ch, mean=BAND_STATS["mean"][b], std=BAND_STATS["std"][b])
+                # ch = normalize(ch, mean=BAND_STATS["mean"][b], std=BAND_STATS["std"][b])
                 channels.append(ch)
             img = np.dstack(channels)
             img = torch.from_numpy(img)
