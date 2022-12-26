@@ -39,6 +39,8 @@ class InMemoryBigearthnet(Dataset):
                     out_shape=(1, self.image_size, self.image_size),
                     resampling=Resampling.bilinear,
                 )
+                # to range (0,1)
+                ch = np.clip(img, 0, 255).astype(np.uint8)/255
                 # ch = normalize(ch, mean=BAND_STATS["mean"][b], std=BAND_STATS["std"][b])
                 channels.append(ch)
             img = np.dstack(channels)
