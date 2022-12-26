@@ -54,3 +54,10 @@ def get_torch_vars(x):
     if torch.cuda.is_available():
         x = x.cuda()
     return Variable(x)
+
+def show(img):
+    fig, ax = plt.subplots(1, figsize=(15,15))
+    plt.axis('off')
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1,2,0)))
+    plt.show()
