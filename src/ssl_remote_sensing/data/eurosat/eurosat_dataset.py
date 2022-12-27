@@ -213,7 +213,7 @@ class InMemoryEuroSATDataset(Dataset):
             label = self.target_transform(class_name)
             class_samples = self.images[label]
             subset_index = sample(range(len(class_samples)), n_per_class)
-            data[class_name] = [class_samples[i] for i in subset_index]
+            data[label] = [class_samples[i] for i in subset_index]
         return EuroSATSubset(data=data)
 
 
