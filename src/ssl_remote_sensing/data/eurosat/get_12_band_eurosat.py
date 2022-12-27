@@ -1,4 +1,3 @@
-import random
 from ssl_remote_sensing.data.eurosat.eurosat_dataset import (
     EuroSATDataset,
     InMemoryEuroSATDataset,
@@ -25,9 +24,7 @@ def get_eurosat_dataloader(
     if split:
         if max_samples != 21600:
             assert in_memory, "Fraction split only possible with in memory dataset"
-            dataset = dataset.return_subset(
-                n_total_samples=max_samples + 5400
-            )
+            dataset = dataset.return_subset(n_total_samples=max_samples + 5400)
         train_set, val_set = random_split(dataset, [max_samples, 5400])
         print(f"[LOG] Total images in the train set is: {len(train_set)}")
         train_loader = DataLoader(

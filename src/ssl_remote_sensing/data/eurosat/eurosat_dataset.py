@@ -1,3 +1,4 @@
+import math
 from random import sample
 
 import os
@@ -193,7 +194,11 @@ class InMemoryEuroSATDataset(Dataset):
             self.images[label] += class_samples
 
     def _images_as_list(self) -> List[Tuple[str, Any]]:
-        return list(self.images.items())
+        return [
+            (k, img)
+            for k, v in self.images.items()
+            for img in v
+        ]
 
     def __len__(self):
         return len(self._images_as_list())
@@ -202,7 +207,7 @@ class InMemoryEuroSATDataset(Dataset):
         return self._images_as_list()[index]
 
     def return_subset(self, n_total_samples: int):
-        n_per_class = int(n_total_samples / len(self.images.keys()))
+        n_per_class = math.ceil(n_total_samples / len(self.images.keys()))
         data = {}
         for class_name in CLASS_NAMES:
             label = self.target_transform(class_name)
@@ -213,12 +218,18 @@ class InMemoryEuroSATDataset(Dataset):
 
 
 class EuroSATSubset(Dataset):
-    def __len__(self):
-        return self.n
+    def _images_as_list(self) -> List[Tuple[str, Any]]:
+        return [
+            (k, img)
+            for k, v in self.images.items()
+            for img in v
+        ]
 
-    def __getitem__(self, index) -> T_co:
-        return self.samples[index]
+    def __len__(self):
+        return len(self._images_as_list())
+
+    def __getitem__(self, index):
+        return self._images_as_list()[index]
 
     def __init__(self, data):
-        self.samples = list(data.items())
-        self.n = len(self.samples)
+        self.images = data
