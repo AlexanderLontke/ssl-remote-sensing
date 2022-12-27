@@ -155,6 +155,7 @@ class DFC2020(data.Dataset):
         img_rgb = np.clip(img_rgb, 0, 1)
 
         mask = label.squeeze()
+        mask = mask/9
 
         fig = plt.figure(figsize=(10, 6))
         grid = ImageGrid(fig, 111,
@@ -166,18 +167,20 @@ class DFC2020(data.Dataset):
                         cbar_pad=0.05
                         )
 
+        # normi = mpl.colors.Normalize(vmin=0, vmax=1);
+
         grid[0].imshow(img_rgb)
         grid[0].axis('off')
         grid[0].set_title('Sentinel-2 RGB')
 
-        imc = grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
+        imc = grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest', vmin = 0, vmax = 1)
         grid[1].axis('off')
         grid[1].set_title('Groundtruth Mask')
 
-        cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=range(9))
+        cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=[0.5/9,1.5/9,2.5/9,3.5/9,4.5/9,5.5/9,6.5/9,7.5/9,8.5/9])
         cbar.set_ticklabels(DFC2020_LABELS)
-        tick_locs = (np.arange(9) + 0.5)*(9-1)/9
-        cbar.set_ticks(tick_locs)
+        # tick_locs = (np.arange(9/9) + 0.5/9)*(9-1)/9/9
+        # cbar.set_ticks(tick_locs)
 
 # mapping from igbp to dfc2020 classes
 DFC2020_CLASSES = [

@@ -143,6 +143,7 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     img_rgb = img_rgb / img_rgb.max()
 
     mask = label.squeeze()
+    mask = mask/9
 
     input_img = img.cpu().detach().numpy()
     input_img = torch.from_numpy(input_img)
@@ -151,6 +152,7 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     output = torch.nn.functional.softmax(output, dim=1)
     output = torch.argmax(output, dim=1)
     output = output.to("cpu").squeeze(0).numpy()
+    output = output/9
 
     # # wandb log
     # img_log = wandb.Image(img_rgb, caption="Sentinel-2 RGB")
@@ -191,10 +193,10 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     grid[2].set_title('Predicted Mask')
     
     # color bar settings
-    cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=range(9))
+    cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=[0.5/9,1.5/9,2.5/9,3.5/9,4.5/9,5.5/9,6.5/9,7.5/9,8.5/9])
     cbar.set_ticklabels(DFC2020_LABELS)
-    tick_locs = (np.arange(9) + 0.5)*(9-1)/9
-    cbar.set_ticks(tick_locs)
+    # tick_locs = (np.arange(9) + 0.5)*(9-1)/9
+    # cbar.set_ticks(tick_locs)
 
     # axs[0].imshow(img_rgb)
     # axs[0].set_title("Sentinel-2 RGB")
