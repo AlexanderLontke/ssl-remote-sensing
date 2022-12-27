@@ -16,6 +16,5 @@ class Hparams:
         self.transform = True
         self.split = False
 
-
 def get_vae_config():
     return Hparams()

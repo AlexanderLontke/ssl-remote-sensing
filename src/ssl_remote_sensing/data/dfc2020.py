@@ -35,7 +35,8 @@ class DFC2020(data.Dataset):
         use_s2mr=False,
         use_s2lr=False,
         use_s1=False,
-        transform: Union[Callable, None] = None
+        transform: Union[Callable, None] = None,
+        label_size: int =  None,
     ):
         """Initialize the dataset"""
 
@@ -43,6 +44,7 @@ class DFC2020(data.Dataset):
         super(DFC2020, self).__init__()
 
         self.transform = transform
+        self.label_size = label_size
 
         # make sure parameters are okay
         if not (use_s2hr or use_s2mr or use_s2lr or use_s1):
@@ -112,12 +114,12 @@ class DFC2020(data.Dataset):
             no_savanna=self.no_savanna,
             igbp=False,
         )
-        if self.transform:
+        if self.transform is not None:
             sample_loaded["image"] = self.transform(np.transpose(sample_loaded["image"], (1, 2, 0)))
 
             trasnform_resize = transforms.Compose([
                 transforms.ToTensor(), 
-                transforms.Resize([128,128]),
+                transforms.Resize([self.label_size,self.label_size]),
                 ])
 
             sample_loaded["label"] = trasnform_resize(sample_loaded["label"])
@@ -174,19 +176,8 @@ class DFC2020(data.Dataset):
 
         cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=range(9))
         cbar.set_ticklabels(DFC2020_LABELS)
-        # set ticks locations (not very elegant, but it works):
-# - shift by 0.5
-# - scale so that the last value is at the center of the last color
         tick_locs = (np.arange(9) + 0.5)*(9-1)/9
         cbar.set_ticks(tick_locs)
-        # plt.clim(-0.5, 8.5)
-
-        # # plot the results
-        # plt.scatter(projection[:, 0], projection[:, 1], lw=0.1,
-        #             c=digits.target, cmap=plt.cm.get_cmap('cubehelix', 6))
-        # plt.colorbar(ticks=range(6), label='digit value')
-        # plt.clim(-0.5, 5.5)
-
 
 # mapping from igbp to dfc2020 classes
 DFC2020_CLASSES = [
