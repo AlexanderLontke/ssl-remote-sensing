@@ -10,6 +10,7 @@ from ssl_remote_sensing.data.bigearthnet.bigearthnet_in_memory_dataset import In
 def get_bigearthnet_dataloader(
     data_dir: Path,
     batch_size: int,
+    normalize = False,
     num_workers: Optional[int] = None,
     dataset_transform: Optional[nn.Module] = None,
     max_samples: Optional[int] = None
@@ -17,6 +18,7 @@ def get_bigearthnet_dataloader(
     bigearthnet_dataset = InMemoryBigearthnet(
         dataset_dir=data_dir,
         transform=dataset_transform,
+        normalize = normalize,
         max_samples=max_samples,
     )
     if not num_workers:
@@ -28,6 +30,4 @@ def get_bigearthnet_dataloader(
         num_workers=num_workers,
         pin_memory=True,
     )
-
-
 

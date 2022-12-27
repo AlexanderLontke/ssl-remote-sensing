@@ -21,7 +21,7 @@ def load_encoder_checkpoint_from_pretext_model(
     elif "vae" in path_to_checkpoint.lower():
 
         return VariationalAutoencoder.load_from_checkpoint(
-           path_to_checkpoint,latent_dim =256,input_height=128, config= get_vae_config()).encoder
+           path_to_checkpoint,latent_dim =256,input_height=64, config= get_vae_config()).encoder
 
         # best_model = VariationalAutoencoder(
         #     latent_dim=get_vae_config().latent_dim, config=get_vae_config()

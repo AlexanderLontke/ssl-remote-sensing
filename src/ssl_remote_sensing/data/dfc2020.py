@@ -150,6 +150,7 @@ class DFC2020(data.Dataset):
         img_rgb = img[[3, 2, 1], :, :]
         img_rgb = np.transpose(img_rgb, (1, 2, 0))
         img_rgb = img_rgb / img_rgb.max()
+        img_rgb = np.clip(img_rgb, 0, 1)
 
         mask = label.squeeze()
 
