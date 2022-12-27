@@ -49,7 +49,8 @@ def train(
     for epoch in range(train_config.epochs):
         epoch_loss = 0
         progress = tqdm(
-            enumerate(train_loader), desc="Train Loss: ", total=len(train_loader)
+            enumerate(train_loader), desc="Train Loss: ", total=len(train_loader), position=0,
+            leave=True,
         )
 
         # Specify you are in training mode

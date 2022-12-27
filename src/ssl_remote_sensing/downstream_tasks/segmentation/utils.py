@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import random
 import wandb
+from tqdm import tqdm
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -210,3 +211,17 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     # fig.colorbar(im_output)
 
     plt.show()
+
+# count label distribution
+def count_label_dist(dataset):
+
+    label_dist = []
+    count = 0
+
+    for label in range(9):
+        for i in tqdm(range(len(dataset)),desc = "dataset counted",position=0,leave=True):
+          percent_label = sum(list(row).count(label) for row in list(dataset[i]["label"])) / (256*256)
+          count += percent_label
+        count = (count /len(dataset))
+        label_dist.append(count)
+    return label_dist
