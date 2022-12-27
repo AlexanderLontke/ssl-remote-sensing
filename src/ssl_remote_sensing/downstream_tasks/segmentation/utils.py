@@ -55,7 +55,7 @@ def patch_first_conv(encoder, new_in_channels, default_in_channels=3):
 
     new_weight = new_weight * (default_in_channels / new_in_channels)
     module.weight = nn.parameter.Parameter(new_weight)
-    
+
     # make sure in_channel is changed
     assert module.in_channels == new_in_channels
 

@@ -1,9 +1,20 @@
 import random
-from ssl_remote_sensing.data.eurosat.eurosat_dataset import EuroSATDataset, InMemoryEuroSATDataset
+from ssl_remote_sensing.data.eurosat.eurosat_dataset import (
+    EuroSATDataset,
+    InMemoryEuroSATDataset,
+)
 from torch.utils.data import DataLoader, random_split
 
 
-def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False, in_memory: bool = False, max_samples: int = 21600):
+def get_eurosat_dataloader(
+    root,
+    transform,
+    batchsize,
+    numworkers,
+    split=False,
+    in_memory: bool = False,
+    max_samples: int = 21600,
+):
     if in_memory:
         dataset = InMemoryEuroSATDataset(root, transform=transform)
     else:
@@ -13,7 +24,10 @@ def get_eurosat_dataloader(root, transform, batchsize, numworkers, split=False, 
 
     if split:
         if max_samples != 21600:
-            dataset.images = [dataset.images[idx] for idx in random.sample(range(len(dataset)), 5400 + max_samples)]
+            assert in_memory, "Fraction split only possible with in memory dataset"
+            dataset = dataset.return_subset(
+                n_total_samples=max_samples + 5400
+            )
         train_set, val_set = random_split(dataset, [max_samples, 5400])
         print(f"[LOG] Total images in the train set is: {len(train_set)}")
         train_loader = DataLoader(

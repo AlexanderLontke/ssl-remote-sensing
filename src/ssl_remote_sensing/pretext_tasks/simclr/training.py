@@ -14,7 +14,9 @@ class SimCLRTraining(pl.LightningModule):
         super().__init__()
         self.config = config
         self.model = AddProjection(config, mlp_dim=feat_dim)
-        self.loss = ContrastiveLoss(batch_size=config.batch_size, temperature=self.config.temperature)
+        self.loss = ContrastiveLoss(
+            batch_size=config.batch_size, temperature=self.config.temperature
+        )
 
     def forward(self, batch, *args, **kwargs) -> torch.Tensor:
         return self.model(batch)

@@ -97,6 +97,7 @@ class DownstreamClassificationNet(nn.Module):
         super().__init__()
         self.gan_encoder = gan_encoder
         self.encoder = encoder if encoder else EncoderBlock()
+        self.encoder.train()
         if freeze_encoder:
             for param in self.encoder.parameters():
                 param.requires_grad = False

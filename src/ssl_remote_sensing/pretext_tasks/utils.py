@@ -43,9 +43,7 @@ def load_encoder_checkpoint_from_pretext_model(
         )
         model.load_state_dict(state_dict_best)
         return model
-    elif (
-        "random" in path_to_checkpoint
-    ):
+    elif "random" in path_to_checkpoint:
         return resnet18_encoder()
     else:
         raise ValueError(

@@ -240,7 +240,7 @@ class ResNetDecoder(nn.Module):
 
 
 # encoder
-def resnet18_encoder(channels:int =12):
+def resnet18_encoder(channels: int = 12):
     return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], channels=channels)
 
 

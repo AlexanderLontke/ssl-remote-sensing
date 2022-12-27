@@ -1,39 +1,30 @@
-import numpy as np
+from random import sample
+
 import os
-from typing import Union, Callable
+from typing import Union, Callable, Tuple, List, Any
 from glob import glob
 import rasterio as rio
+from torch.utils.data.dataset import T_co
 from tqdm import tqdm
-from rasterio.plot import reshape_as_image
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
 
+CLASS_NAMES = [
+    "AnnualCrop",
+    "Forest",
+    "HerbaceousVegetation",
+    "Highway",
+    "Industrial",
+    "Pasture",
+    "Residential",
+    "River",
+    "SeaLake",
+]
 # Define classes
-classes_to_int = {
-    "AnnualCrop": 0,
-    "Forest": 1,
-    "HerbaceousVegetation": 2,
-    "Highway": 3,
-    "Industrial": 4,
-    "Pasture": 5,
-    "PermanentCrop": 6,
-    "Residential": 7,
-    "River": 8,
-    "SeaLake": 9,
-}
-classes_to_label = {
-    0: "AnnualCrop",
-    1: "Forest",
-    2: "HerbaceousVegetation",
-    3: "Highway",
-    4: "Industrial",
-    5: "Pasture",
-    6: "PermanentCrop",
-    7: "Residential",
-    8: "River",
-    9: "SeaLake",
-}
+classes_to_int = {CLASS_NAMES[i]: i for i in range(len(CLASS_NAMES))}
+
+classes_to_label = {i: CLASS_NAMES[i] for i in range(len(CLASS_NAMES))}
 
 # dataset = EuroSAT(
 #     "/Users/alexanderlontke/datasets/",
@@ -69,7 +60,7 @@ stds_tuple = (
     98.92998227431653,
     378.16138952053035,
     303.10651348740964,
-    502.16376466306053
+    502.16376466306053,
 )
 
 # def batch_mean_and_sd(loader):
@@ -98,7 +89,7 @@ train_means = [
     731.7947,
     12.091442,
     1117.7218,
-    2603.26
+    2603.26,
 ]
 
 train_stds = [
@@ -113,7 +104,7 @@ train_stds = [
     403.872,
     4.717908,
     761.2879,
-    1234.1173
+    1234.1173,
 ]
 
 
@@ -140,17 +131,17 @@ class EuroSATDataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, index):
-        sample = self.samples[index]
+        sample_path = self.samples[index]
 
         # Extract bands
-        with rio.open(sample, "r") as d:
+        with rio.open(sample_path, "r") as d:
             ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13]
             image = d.read(ms_channels)
             image = torch.tensor(image.astype(float))
             image = image.float()
 
         # Extract label
-        label = sample.split("/")[-1].split("_")[0]
+        label = sample_path.split("/")[-1].split("_")[0]
 
         if self.transform:
             image = self.transform(image)
@@ -168,31 +159,62 @@ class InMemoryEuroSATDataset(Dataset):
         transform: Union[Callable, None] = None,
         target_transform: Union[Callable, None] = None,
     ):
-        self.samples = glob(os.path.join(dataset_dir, "*", "*.tif"))
-        self.transform = transform
-        self.target_transform = target_transform
-        self.images = []
-        for sample in tqdm(self.samples, desc="Loading Images"):
+        self.samples = {
+            class_name: glob(os.path.join(dataset_dir, class_name, "*.tif"))
+            for class_name in CLASS_NAMES
+        }
+        if transform:
+            self.transform = transform
+        else:
+            self.transform = lambda x: x
+
+        if target_transform:
+            self.target_transform = target_transform
+        else:
+            self.target_transform = euro_sat_target_transform
+        self.images = {class_name: [] for class_name in CLASS_NAMES}
+        for class_name, sample_path in tqdm(
+            self.samples.items(), desc="Loading Images"
+        ):
             # Extract bands
-            with rio.open(sample, "r") as d:
+            with rio.open(sample_path, "r") as d:
                 ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13]
                 image = d.read(ms_channels)
                 image = torch.tensor(image.astype(float))
                 image = image.float()
 
-            # Extract label
-            label = sample.split("/")[-1].split("_")[0]
+            label = class_name
+            image = self.transform(image)
+            label = self.target_transform(label)
+            self.images[label] += [image]
 
-            if self.transform:
-                image = self.transform(image)
-            if self.target_transform:
-                label = self.target_transform(label)
-            else:
-                label = euro_sat_target_transform(label)
-            self.images += [(image, label)]
+    def _images_as_list(self) -> List[Tuple[str, Any]]:
+        return list(self.images.items())
 
     def __len__(self):
-        return len(self.images)
+        return len(self._images_as_list())
 
     def __getitem__(self, index):
-        return self.images[index]
+        return self._images_as_list()[index]
+
+    def return_subset(self, n_total_samples: int):
+        n_per_class = int(n_total_samples / len(self.images.keys()))
+        data = {}
+        for class_name in CLASS_NAMES:
+            label = self.target_transform(class_name)
+            class_samples = self.images[label]
+            subset_index = sample(range(len(class_samples)), n_per_class)
+            data[class_name] = [class_samples[i] for i in subset_index]
+        return EuroSATSubset(data=data)
+
+
+class EuroSATSubset(Dataset):
+    def __len__(self):
+        return self.n
+
+    def __getitem__(self, index) -> T_co:
+        return self.samples[index]
+
+    def __init__(self, data):
+        self.samples = list(data.items())
+        self.n = len(self.samples)
