@@ -172,7 +172,9 @@ class InMemoryEuroSATDataset(Dataset):
             self.target_transform = target_transform
         else:
             self.target_transform = euro_sat_target_transform
-        self.images = {class_name: [] for class_name in CLASS_NAMES}
+        self.images = {
+            self.target_transform(class_name): [] for class_name in CLASS_NAMES
+        }
         for class_name, sample_paths in tqdm(
             self.samples.items(), desc="Loading Images"
         ):
