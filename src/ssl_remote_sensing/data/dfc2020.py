@@ -117,13 +117,13 @@ class DFC2020(data.Dataset):
         if self.transform is not None:
             sample_loaded["image"] = self.transform(np.transpose(sample_loaded["image"], (1, 2, 0)))
 
-            trasnform_resize = transforms.Compose([
-                transforms.ToTensor(), 
-                transforms.Resize([self.label_size,self.label_size]),
-                ])
+            # trasnform_resize = transforms.Compose([
+            #     transforms.ToTensor(), 
+            #     transforms.Resize([self.label_size,self.label_size]),
+            #     ])
 
-            sample_loaded["label"] = trasnform_resize(sample_loaded["label"])
-            sample_loaded["label"] = np.squeeze(sample_loaded["label"] )
+            # sample_loaded["label"] = trasnform_resize(sample_loaded["label"])
+            # sample_loaded["label"] = np.squeeze(sample_loaded["label"] )
             return sample_loaded
         else:
             return sample_loaded
