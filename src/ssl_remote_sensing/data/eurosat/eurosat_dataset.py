@@ -173,20 +173,22 @@ class InMemoryEuroSATDataset(Dataset):
         else:
             self.target_transform = euro_sat_target_transform
         self.images = {class_name: [] for class_name in CLASS_NAMES}
-        for class_name, sample_path in tqdm(
+        for class_name, sample_paths in tqdm(
             self.samples.items(), desc="Loading Images"
         ):
-            # Extract bands
-            with rio.open(sample_path, "r") as d:
-                ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13]
-                image = d.read(ms_channels)
-                image = torch.tensor(image.astype(float))
-                image = image.float()
+            class_samples = []
+            for sample_path in sample_paths:
+                # Extract bands
+                with rio.open(sample_path, "r") as d:
+                    ms_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13]
+                    image = d.read(ms_channels)
+                    image = torch.tensor(image.astype(float))
+                    image = image.float()
+                class_samples += [self.transform(image)]
 
             label = class_name
-            image = self.transform(image)
             label = self.target_transform(label)
-            self.images[label] += [image]
+            self.images[label] += class_samples
 
     def _images_as_list(self) -> List[Tuple[str, Any]]:
         return list(self.images.items())
