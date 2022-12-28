@@ -18,6 +18,7 @@ CLASS_NAMES = [
     "Highway",
     "Industrial",
     "Pasture",
+    "PermanentCrop"
     "Residential",
     "River",
     "SeaLake",
