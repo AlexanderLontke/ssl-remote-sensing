@@ -5,7 +5,6 @@ import os
 from typing import Union, Callable, Tuple, List, Any
 from glob import glob
 import rasterio as rio
-from torch.utils.data.dataset import T_co
 from tqdm import tqdm
 import torch
 from torch.utils.data import Dataset
@@ -18,7 +17,7 @@ CLASS_NAMES = [
     "Highway",
     "Industrial",
     "Pasture",
-    "PermanentCrop"
+    "PermanentCrop",
     "Residential",
     "River",
     "SeaLake",
