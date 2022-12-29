@@ -31,6 +31,7 @@ class DFC2020(data.Dataset):
         path,
         subset="val",
         no_savanna=False,
+        no_snow = True,
         use_s2hr=False,
         use_s2mr=False,
         use_s2lr=False,
@@ -58,6 +59,7 @@ class DFC2020(data.Dataset):
         self.use_s1 = use_s1
         assert subset in ["val", "test"]
         self.no_savanna = no_savanna
+        self.no_snow = no_snow
 
         # provide number of input channels
         self.n_inputs = get_ninputs(use_s1, use_s2hr, use_s2mr, use_s2lr)
@@ -72,6 +74,12 @@ class DFC2020(data.Dataset):
             self.n_classes = max(DFC2020_CLASSES) - 1
         else:
             self.n_classes = max(DFC2020_CLASSES)
+
+        if no_snow:
+            self.n_classes = self.n_classes  - 1
+        else:
+            self.n_classes = self.n_classes 
+
 
         # make sure parent dir exists
         assert os.path.exists(path)
@@ -112,18 +120,19 @@ class DFC2020(data.Dataset):
             self.use_s2mr,
             self.use_s2lr,
             no_savanna=self.no_savanna,
+            no_snow = self.no_snow,
             igbp=False,
         )
         if self.transform is not None:
             sample_loaded["image"] = self.transform(np.transpose(sample_loaded["image"], (1, 2, 0)))
 
-            # trasnform_resize = transforms.Compose([
-            #     transforms.ToTensor(), 
-            #     transforms.Resize([self.label_size,self.label_size]),
-            #     ])
+            trasnform_resize = transforms.Compose([
+                transforms.ToTensor(), 
+                transforms.Resize([self.label_size,self.label_size]),
+                ])
 
-            # sample_loaded["label"] = trasnform_resize(sample_loaded["label"])
-            # sample_loaded["label"] = np.squeeze(sample_loaded["label"] )
+            sample_loaded["label"] = trasnform_resize(sample_loaded["label"])
+            sample_loaded["label"] = np.squeeze(sample_loaded["label"] )
             return sample_loaded
         else:
             return sample_loaded
@@ -155,7 +164,7 @@ class DFC2020(data.Dataset):
         img_rgb = np.clip(img_rgb, 0, 1)
 
         mask = label.squeeze()
-        mask = mask/9
+        mask = mask/self.n_classes
 
         fig = plt.figure(figsize=(10, 6))
         grid = ImageGrid(fig, 111,
@@ -173,11 +182,11 @@ class DFC2020(data.Dataset):
         grid[0].axis('off')
         grid[0].set_title('Sentinel-2 RGB')
 
-        imc = grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest', vmin = 0, vmax = 1)
+        imc = grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 8), interpolation='nearest', vmin = 0, vmax = 1)
         grid[1].axis('off')
         grid[1].set_title('Groundtruth Mask')
 
-        cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=[0.5/9,1.5/9,2.5/9,3.5/9,4.5/9,5.5/9,6.5/9,7.5/9,8.5/9])
+        cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=[0.5/8,1.5/8,2.5/8,3.5/8,4.5/8,5.5/8,6.5/8,7.5/8])
         cbar.set_ticklabels(DFC2020_LABELS)
         # tick_locs = (np.arange(9/9) + 0.5/9)*(9-1)/9/9
         # cbar.set_ticks(tick_locs)
@@ -199,7 +208,7 @@ DFC2020_CLASSES = [
     6,  # 12 --> 6
     7,  # 13 --> 7
     6,  # 14 --> 6
-    8,
+    8,  # --> will be masked if no_snow == True
     9,
     10,
 ]
@@ -211,7 +220,7 @@ DFC2020_LABELS = [
     "Wetlands",
     "Croplands", 
     "Urban & Built-Up Lands", 
-    "Permanent Snow & Ice", 
+    # "Permanent Snow & Ice", 
     "Barren", 
     "Water Bodies",
 ]
@@ -256,7 +265,7 @@ def load_s1(path):
 
 
 # util function for reading lc data
-def load_lc(path, no_savanna=False, igbp=True):
+def load_lc(path, no_savanna=False, no_snow = True, igbp=True):
 
     # load labels
     with rasterio.open(path) as data:
@@ -273,6 +282,10 @@ def load_lc(path, no_savanna=False, igbp=True):
         lc[lc == 3] = 0
         lc[lc > 3] -= 1
 
+    if no_snow:
+        lc[lc == 7] = 0
+        lc[lc > 7] -= 1 
+
     # convert to zero-based labels and set ignore mask
     lc -= 1
     lc[lc == -1] = 255
@@ -287,6 +300,7 @@ def load_sample(
     use_s2mr,
     use_s2lr,
     no_savanna=False,
+    no_snow = True,
     igbp=True,
     unlabeled=False,
 ):
@@ -308,7 +322,7 @@ def load_sample(
     if unlabeled:
         return {"image": img, "id": sample["id"]}
     else:
-        lc = load_lc(sample["lc"], no_savanna=no_savanna, igbp=igbp)
+        lc = load_lc(sample["lc"], no_savanna=no_savanna, no_snow = no_snow, igbp=igbp)
 
         return {"image": img, "label": lc, "id": sample["id"]}
 

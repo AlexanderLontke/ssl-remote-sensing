@@ -5,7 +5,7 @@ DFC2020_LABELS = [
     "Wetlands",
     "Croplands", 
     "Urban & Built-Up Lands", 
-    "Permanent Snow & Ice", 
+    # "Permanent Snow & Ice", 
     "Barren", 
     "Water Bodies",
 ]

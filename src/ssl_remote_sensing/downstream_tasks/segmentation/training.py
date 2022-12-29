@@ -17,6 +17,7 @@ def train(
     device,
     model_path,
     wandb=wandb,
+    n_classes = 8
 ):
     # Initialise the optimizer
     if train_config.optim == "Adam":
@@ -42,8 +43,8 @@ def train(
     # jaccard = JaccardIndex(task="multiclass", num_classes=9).to(device)
 
     # accuracy
-    accuracy = Accuracy(task="multiclass", num_classes=9).to(device)
-    accuracy_perclass = Accuracy(task="multiclass", num_classes=9,average = None).to(device)
+    accuracy = Accuracy(task="multiclass", num_classes=n_classes).to(device)
+    accuracy_perclass = Accuracy(task="multiclass", num_classes=n_classes,average = None).to(device)
 
     # For every epoch
     for epoch in range(train_config.epochs):
@@ -65,8 +66,8 @@ def train(
         epoch_train_accs = 0
         epoch_val_accs = 0
 
-        epoch_train_accs_class = [0] * 9
-        epoch_val_accs_class = [0] * 9
+        epoch_train_accs_class = [0] * n_classes
+        epoch_val_accs_class = [0] * n_classes
 
         for i, batch in progress:
             # Transfer data to GPU if available
@@ -80,7 +81,7 @@ def train(
 
             # Compute IoU
             epoch_train_ious += multiclass_jaccard_index(
-                output_multi.to(device), label, num_classes=9
+                output_multi.to(device), label, num_classes=n_classes
             ) / len(train_loader)
 
             # Compute pixel accuracies
@@ -142,7 +143,7 @@ def train(
 
                 # Compute IoU
                 epoch_val_ious += multiclass_jaccard_index(
-                    output_multi.to(device), label, num_classes=9
+                    output_multi.to(device), label, num_classes=n_classes
                 ) / len(val_loader)
 
                 # Compute pixel accuracies

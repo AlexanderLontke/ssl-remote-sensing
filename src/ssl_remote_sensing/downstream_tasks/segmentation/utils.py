@@ -125,7 +125,6 @@ def get_metrics(true, preds):
 
 
 
-
 def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=None):
 
     if not idx:
@@ -143,7 +142,8 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     img_rgb = img_rgb / img_rgb.max()
 
     mask = label.squeeze()
-    mask = mask/9
+    mask = mask/8
+    # print("Debug: mask", mask)
 
     input_img = img.cpu().detach().numpy()
     input_img = torch.from_numpy(input_img)
@@ -152,7 +152,8 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
     output = torch.nn.functional.softmax(output, dim=1)
     output = torch.argmax(output, dim=1)
     output = output.to("cpu").squeeze(0).numpy()
-    output = output/9
+    output = output/8
+    # print("Debug: output", output)
 
     # # wandb log
     # img_log = wandb.Image(img_rgb, caption="Sentinel-2 RGB")
@@ -183,17 +184,17 @@ def visualize_result(idx, bst_model, valset, device, wandb=wandb, model_name=Non
 
     # ground truth
     # grid[1].imshow(mask)
-    grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
+    grid[1].imshow(mask, cmap=plt.cm.get_cmap('cubehelix', 8), interpolation='nearest', vmin = 0, vmax = 1)
     grid[1].set_title('Groundtruth Mask')
     grid[1].axis('off')
 
     # predicted mask
-    imc = grid[2].imshow(output, cmap=plt.cm.get_cmap('cubehelix', 9), interpolation='nearest')
+    imc = grid[2].imshow(output, cmap=plt.cm.get_cmap('cubehelix', 8), interpolation='nearest', vmin = 0, vmax = 1)
     grid[2].axis('off')
     grid[2].set_title('Predicted Mask')
     
     # color bar settings
-    cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=[0.5/9,1.5/9,2.5/9,3.5/9,4.5/9,5.5/9,6.5/9,7.5/9,8.5/9])
+    cbar = plt.colorbar(imc, cax=grid.cbar_axes[0],ticks=[0.5/8,1.5/8,2.5/8,3.5/8,4.5/8,5.5/8,6.5/8,7.5/8])
     cbar.set_ticklabels(DFC2020_LABELS)
     # tick_locs = (np.arange(9) + 0.5)*(9-1)/9
     # cbar.set_ticks(tick_locs)
@@ -220,7 +221,7 @@ def count_label_dist(dataset):
     label_dist = []
     count = 0
 
-    for label in range(9):
+    for label in range(8):
         for i in tqdm(range(len(dataset)),desc = "dataset counted",position=0,leave=True):
           percent_label = sum(list(row).count(label) for row in list(dataset[i]["label"])) / (256*256)
           count += percent_label
