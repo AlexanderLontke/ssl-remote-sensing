@@ -124,12 +124,12 @@ class DecoderBlock(nn.Module):
 
 
 class ResNetEncoder(nn.Module):
-    def __init__(self, block, layers):
+    def __init__(self, block, layers, channels: int = 3):
         super().__init__()
 
         self.inplanes = 64
         self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
+            channels, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
         )
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -199,8 +199,9 @@ class ResNetDecoder(nn.Module):
 
         self.upscale1 = Interpolate(size=input_height // self.upscale_factor)
 
+        ### channel to be changed
         self.conv1 = nn.Conv2d(
-            64 * block.expansion, 3, kernel_size=3, stride=1, padding=1, bias=False
+            64 * block.expansion, 12, kernel_size=3, stride=1, padding=1, bias=False
         )
 
     def _make_layer(self, block, planes, blocks, scale=1):
@@ -239,8 +240,8 @@ class ResNetDecoder(nn.Module):
 
 
 # encoder
-def resnet18_encoder():
-    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2])
+def resnet18_encoder(channels: int = 12):
+    return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], channels=channels)
 
 
 # decoder
@@ -514,11 +515,20 @@ class ResNet(nn.Module):
         return param_list
 
 
-def resnet18_basenet(pretrained=False, **kwargs):
+def resnet18_basenet(pretrained=False, random_init=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
+
+    @staticmethod
+    def _weights_init(m):
+        classname = m.__class__.__name__
+        if classname.find("Conv") != -1:
+            nn.init.normal_(m.weight, 0.0, 0.02)
+        elif classname.find("BatchNorm") != -1:
+            nn.init.normal_(m.weight, 1.0, 0.02)
+            nn.init.zeros_(m.bias)
 
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
@@ -527,5 +537,9 @@ def resnet18_basenet(pretrained=False, **kwargs):
                 "https://download.pytorch.org/models/resnet18-5c106cde.pth"
             )
         )
+
+    model.conv1 = nn.Conv2d(12, 64, 7, 2, 3, bias=False)
     model.fc = nn.Sequential()
+    if random_init:
+        _weights_init(model)
     return model

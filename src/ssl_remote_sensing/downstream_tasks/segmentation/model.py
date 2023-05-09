@@ -50,7 +50,7 @@ class ResNetUNet(nn.Module):
         self.conv_up0 = convrelu(64 + 256, 128, 3, 1)
 
         # from 3 to 13
-        self.conv_original_size0 = convrelu(13, 64, 3, 1)
+        self.conv_original_size0 = convrelu(12, 64, 3, 1)
         self.conv_original_size1 = convrelu(64, 64, 3, 1)
         self.conv_original_size2 = convrelu(64 + 128, 64, 3, 1)
 

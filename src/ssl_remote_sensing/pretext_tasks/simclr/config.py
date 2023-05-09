@@ -6,11 +6,12 @@ class Hparams:
         self.img_size = 64  # image shape
         self.save = "./saved_models/"  # save checkpoint
         self.gradient_accumulation_steps = 1  # gradient accumulation steps
-        self.batch_size = 64
+        self.batch_size = 500
         self.lr = 1e-3
         self.embedding_size = 128  # papers value is 128
         self.temperature = 0.5  # 0.1 or 0.5
         self.weight_decay = 1e-6
+        self.in_channels = 12
 
 
 def get_simclr_config():
