@@ -31,7 +31,7 @@ def visualize_simclr_augmentation(original_images: List[Image.Image]):
     rows = 3
     cols = len(original_images)
     # Create new grid image
-    grid = Image.new('RGB', size=(cols * w, rows * h))
+    grid = Image.new("RGB", size=(cols * w, rows * h))
     for i, image in enumerate(original_images):
         # Augment input image
         augment1, augment2 = aug(image)

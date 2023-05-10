@@ -20,7 +20,13 @@ def normalize(img, mean, std):
 
 
 class InMemoryBigearthnet(Dataset):
-    def __init__(self, dataset_dir, bands=ALL_BANDS, transform=None, max_samples: Optional[int] = None):
+    def __init__(
+        self,
+        dataset_dir,
+        bands=ALL_BANDS,
+        transform=None,
+        max_samples: Optional[int] = None,
+    ):
         self.bands = bands
         self.transform = transform
         self.samples = glob.glob(os.path.join(dataset_dir, "*"))

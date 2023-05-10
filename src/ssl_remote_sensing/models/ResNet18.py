@@ -244,13 +244,15 @@ class ResNetDecoder(nn.Module):
 
 
 # encoder
-def resnet18_encoder(channels:int =3):
+def resnet18_encoder(channels: int = 12):
     return ResNetEncoder(EncoderBlock, [2, 2, 2, 2], channels=channels)
+
 
 
 # decoder
 def resnet18_decoder(latent_dim, input_height, channels: int = 12):
     return ResNetDecoder(DecoderBlock, [2, 2, 2, 2], latent_dim, input_height,channels = 12)
+
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -532,7 +534,7 @@ def resnet18_basenet(pretrained=False, random_init=False, **kwargs):
         elif classname.find("BatchNorm") != -1:
             nn.init.normal_(m.weight, 1.0, 0.02)
             nn.init.zeros_(m.bias)
-    
+
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
         model.load_state_dict(
@@ -540,7 +542,7 @@ def resnet18_basenet(pretrained=False, random_init=False, **kwargs):
                 "https://download.pytorch.org/models/resnet18-5c106cde.pth"
             )
         )
-        
+
     model.conv1 = nn.Conv2d(12, 64, 7, 2, 3, bias=False)
     model.fc = nn.Sequential()
     if random_init:

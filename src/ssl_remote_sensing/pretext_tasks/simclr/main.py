@@ -11,7 +11,9 @@ from ssl_remote_sensing.pretext_tasks.simclr.utils import reproducibility
 from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
 from ssl_remote_sensing.pretext_tasks.simclr.augmentation import Augment
 from ssl_remote_sensing.pretext_tasks.simclr.config import get_simclr_config
-from ssl_remote_sensing.data.bigearthnet.bigearthnet_dataloader import get_bigearthnet_dataloader
+from ssl_remote_sensing.data.bigearthnet.bigearthnet_dataloader import (
+    get_bigearthnet_dataloader,
+)
 
 # Machine setup
 available_gpus = torch.cuda.device_count()
@@ -57,8 +59,7 @@ checkpoint_callback = ModelCheckpoint(
 
 # Setup WandB logging
 wandb_logger = WandbLogger(
-    project="ssl-remote-sensing-simclr",
-    config=train_config.__dict__
+    project="ssl-remote-sensing-simclr", config=train_config.__dict__
 )
 shared_trainer_kwargs = {
     "callbacks": [accumulator, checkpoint_callback],
@@ -74,7 +75,7 @@ if resume_from_checkpoint:
     )
 else:
     trainer = Trainer(
-         **shared_trainer_kwargs,
+        **shared_trainer_kwargs,
     )
 
 trainer.fit(model, bigearthnet_dataloader)
