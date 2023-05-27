@@ -9,7 +9,17 @@ from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
 from ssl_remote_sensing.pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
 from ssl_remote_sensing.models.ResNet18 import resnet18_basenet
 from ssl_remote_sensing.pretext_tasks.gan.config import get_bigan_config
+import numpy as np
 
+
+def reproducibility(config):
+    SEED = int(config.seed)
+    torch.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(SEED)
+    if config.cuda:
+        torch.cuda.manual_seed(SEED)
 
 def load_encoder_checkpoint_from_pretext_model(
     path_to_checkpoint: str,
