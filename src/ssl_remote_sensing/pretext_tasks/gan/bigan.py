@@ -9,10 +9,10 @@ from itertools import chain
 from torch.autograd import Variable
 import torchvision
 
-from ssl_remote_sensing.pretext_tasks.gan.bigan_discriminator import BiganDiscriminator
-from ssl_remote_sensing.pretext_tasks.gan.bigan_generator import BiganResnetGenerator
-from ssl_remote_sensing.pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
-from ssl_remote_sensing.models.ResNet18 import resnet18_basenet
+from pretext_tasks.gan.bigan_discriminator import BiganDiscriminator
+from pretext_tasks.gan.bigan_generator import BiganResnetGenerator
+from pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
+from models.ResNet18 import resnet18_basenet
 
 
 class BIGAN(LightningModule):

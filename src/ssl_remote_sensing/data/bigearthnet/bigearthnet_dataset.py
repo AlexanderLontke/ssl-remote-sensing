@@ -8,7 +8,7 @@ import torch
 import glob
 from rasterio.enums import Resampling
 
-from ssl_remote_sensing.data.bigearthnet.constants import ALL_BANDS, BAND_STATS
+from data.bigearthnet.constants import ALL_BANDS, BAND_STATS
 
 
 def normalize(img, mean, std):

@@ -24,7 +24,7 @@ class Augment:
         self.train_transform = T.Compose(
             [
                 # Crop image on a random scale from 7% to 100%
-                T.RandomResizedCrop(size=img_size),
+                T.RandomResizedCrop(size=img_size,  antialias=True),
                 # Flip image horizontally with 50% probability
                 T.RandomHorizontalFlip(p=0.5),
                 # Apply heavy color jitter with 80% probability

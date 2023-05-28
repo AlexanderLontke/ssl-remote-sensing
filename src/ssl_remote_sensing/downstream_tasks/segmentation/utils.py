@@ -8,18 +8,18 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
-from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
-from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
 from sklearn.metrics import confusion_matrix, accuracy_score, jaccard_score
-from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
-from ssl_remote_sensing.models.ResNet18 import ResNetEncoder, resnet18_encoder
-from ssl_remote_sensing.pretext_tasks.simclr.config import get_simclr_config
-from ssl_remote_sensing.pretext_tasks.vae.config import get_vae_config
-from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
-from ssl_remote_sensing.pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
-from ssl_remote_sensing.models.ResNet18 import resnet18_basenet
-from ssl_remote_sensing.pretext_tasks.gan.config import get_bigan_config
-from ssl_remote_sensing.downstream_tasks.segmentation.constants import DFC2020_LABELS
+
+from pretext_tasks.vae.model import VariationalAutoencoder
+from pretext_tasks.simclr.training import SimCLRTraining
+from pretext_tasks.gan.bigan_encoder import BiganResnetEncoder
+
+from models.ResNet18 import ResNetEncoder, resnet18_encoder, resnet18_basenet
+
+from pretext_tasks.simclr.config import get_simclr_config
+from pretext_tasks.vae.config import get_vae_config
+from pretext_tasks.gan.config import get_bigan_config
+from downstream_tasks.segmentation.constants import DFC2020_LABELS
 
 
 def best_model_loader(pretext_model, saved_model_path):

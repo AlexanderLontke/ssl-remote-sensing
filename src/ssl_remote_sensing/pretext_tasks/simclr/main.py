@@ -7,11 +7,11 @@ import torchvision.transforms as T
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 
-from ssl_remote_sensing.pretext_tasks.simclr.utils import reproducibility
-from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
-from ssl_remote_sensing.pretext_tasks.simclr.augmentation import Augment
-from ssl_remote_sensing.pretext_tasks.simclr.config import get_simclr_config
-from ssl_remote_sensing.data.bigearthnet.bigearthnet_dataloader import (
+from pretext_tasks.simclr.utils import reproducibility
+from pretext_tasks.simclr.training import SimCLRTraining
+from pretext_tasks.simclr.augmentation import Augment
+from pretext_tasks.simclr.config import get_simclr_config
+from data.bigearthnet.bigearthnet_dataloader import (
     get_bigearthnet_dataloader,
 )
 

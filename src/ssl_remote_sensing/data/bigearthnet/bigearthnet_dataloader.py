@@ -4,7 +4,7 @@ from typing import Optional
 
 from torch import nn
 from torch.utils.data import DataLoader
-from ssl_remote_sensing.data.bigearthnet.bigearthnet_in_memory_dataset import InMemoryBigearthnet
+from data.bigearthnet.bigearthnet_in_memory_dataset import InMemoryBigearthnet
 
 def get_bigearthnet_dataloader(
     data_dir: Path,
@@ -20,6 +20,7 @@ def get_bigearthnet_dataloader(
     )
     if not num_workers:
         num_workers = os.cpu_count()
+        print(f"Using {num_workers} workers for dataloading")
     return DataLoader(
         dataset=bigearthnet_dataset,
         batch_size=batch_size,

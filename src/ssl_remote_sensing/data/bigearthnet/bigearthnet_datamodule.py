@@ -2,10 +2,10 @@ from torch import nn
 from typing import Optional, List
 from torchvision import transforms
 from pytorch_lightning import LightningDataModule
-
 from torch.utils.data import DataLoader
-from ssl_remote_sensing.data.bigearthnet.bigearthnet_dataset import Bigearthnet
-from ssl_remote_sensing.data.bigearthnet.constants import ALL_BANDS
+
+from data.bigearthnet.bigearthnet_dataset import Bigearthnet
+from data.bigearthnet.constants import ALL_BANDS
 
 
 class BigearthnetDataModule(LightningDataModule):

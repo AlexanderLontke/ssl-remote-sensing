@@ -6,7 +6,7 @@ from typing import List, Union
 
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
-from ssl_remote_sensing.pretext_tasks.simclr.augmentation import Augment
+from pretext_tasks.simclr.augmentation import Augment
 
 
 def imshow(img, norm_means, norm_stds):

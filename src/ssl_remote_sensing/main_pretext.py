@@ -5,13 +5,15 @@ import wandb
 import torchvision.transforms as T
 from pytorch_lightning.callbacks import GradientAccumulationScheduler, ModelCheckpoint
 from pytorch_lightning import Trainer
-
-from ssl_remote_sensing.pretext_tasks.utils import reproducibility
-from ssl_remote_sensing.data.bigearthnet.bigearthnet_dataloader import get_bigearthnet_dataloader
-from ssl_remote_sensing.pretext_tasks.simclr.augmentation import Augment
-from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
-from ssl_remote_sensing.pretext_tasks.vae.model import VariationalAutoencoder
 from pytorch_lightning.loggers import WandbLogger
+
+from pretext_tasks.utils import reproducibility
+from data.bigearthnet.bigearthnet_dataloader import get_bigearthnet_dataloader
+from pretext_tasks.simclr.augmentation import Augment
+from pretext_tasks.simclr.training import SimCLRTraining
+from pretext_tasks.vae.model import VariationalAutoencoder
+from pretext_tasks.gan.bigan import BIGAN
+from pretext_tasks.simclr.config import get_simclr_config
 
 parser = argparse.ArgumentParser(description='SSL Pretraining')
 
@@ -28,7 +30,7 @@ parser.add_argument('--epochs', type=int, default=30, help='number of training e
 parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
 parser.add_argument('--optim', type=str, default='Adam', help='optimizer')
-parser.add_argument('--img_size', type=int, default=12, help='image shape')
+parser.add_argument('--img_size', type=int, default=64, help='image shape')
 
 # vae and bigan special settings
 parser.add_argument('--latent_dim', type=int, default=256, help='latent dimension for vae model')
@@ -44,7 +46,11 @@ parser.add_argument('--feature_maps_gen', type=int, default=64, help='feature ma
 parser.add_argument('--feature_maps_disc', type=int, default=64, help='feature maps for discriminator')
 parser.add_argument('--feature_maps_enc', type=int, default=64, help='feature maps for encoder')
 
+# pretext_tasks = ['vae', 'simclr', 'bigan']
+
 def main_pretext():
+
+    # global pretext_tasks
 
     args = parser.parse_args()
 
@@ -59,13 +65,27 @@ def main_pretext():
 
     available_gpus = torch.cuda.device_count()
     print("available_gpus:", available_gpus)
-    file_name = f'{args.pretext}-{args.batch_size}.ckpt'
+    file_name = f'{args.pretext}-batchsize_{args.batch_size}.ckpt'
     save_model_path = os.path.join(os.getcwd(), "saved_models/")
     if not os.path.exists(save_model_path):
         os.makedirs(save_model_path)
+    file_path = os.path.join(save_model_path, file_name)
 
     reproducibility(args)
 
+    ########### DATA ###########
+
+    if args.pretext == 'simclr':
+        transform = Augment(args.img_size, normalizer=T.RandomCrop(64))
+    if args.pretext == 'vae':
+        transform = T.Compose([T.Resize([64,64], antialias=True)])
+    if args.pretext == 'bigan':
+       transform = T.Compose([T.Resize([64,64], antialias=True)])
+
+    train_loader  = get_bigearthnet_dataloader(args.data, batch_size = args.batch_size, dataset_transform = transform, max_samples = 1000)
+    # print("image shape: ", next(iter(train_loader))[0].shape)
+    # assert next(iter(train_loader)).shape == (args.batch_size, 12, 64, 64)
+# 
     ########### MODEL ###########
 
     if args.pretext == 'simclr':
@@ -74,7 +94,7 @@ def main_pretext():
             feat_dim=512,
             )
     if args.pretext == 'vae':
-        model =  VariationalAutoencoder(latent_dim = args.latent_dim, config = args)
+        model =  VariationalAutoencoder(latent_dim = args.latent_dim, input_height=64, config = args)
     if args.pretext == 'bigan':
         model = BIGAN()
 
@@ -82,19 +102,6 @@ def main_pretext():
         print('using CPU, this will be slow')
     else:
         model.cuda()
-
-    ########### DATA ###########
-
-    if args.pretext == 'simclr':
-        transform = Augment(args.img_size, normalizer=T.RandomCrop(64))
-    if args.pretext == 'vae':
-        transform = T.Compose([T.Resize([128,128])])
-    if args.pretext == 'bigan':
-        pass
-
-    train_loader  = get_bigearthnet_dataloader(args.data, batch_size = args.batch_size, num_workers = 1, dataset_transform = transform)
-    assert next(iter(train_loader)).shape == (args.batch_size, 12, 128, 128)
-
 
     ########### TRAINING ###########
 
@@ -124,7 +131,7 @@ def main_pretext():
             every_n_epochs=1,
             save_last=True,
             save_top_k=2,
-            monitor="elb",
+            monitor="elbo",
             mode="min",
         )
         shared_trainer_kwargs = {
@@ -154,7 +161,9 @@ def main_pretext():
 
     trainer = Trainer(**shared_trainer_kwargs)
     trainer.fit(model, train_loader)
-    trainer.save_checkpoint(f"{run_name}.ckpt")
+    trainer.save_checkpoint(file_path)
     wandb.save(f"{run_name}.ckpt")
     wandb.finish()        
 
+if __name__ == '__main__':
+    main_pretext()

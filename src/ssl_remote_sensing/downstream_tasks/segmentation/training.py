@@ -5,7 +5,8 @@ from torchmetrics import Accuracy
 from torchmetrics.functional.classification import multiclass_jaccard_index
 import pandas as pd
 import numpy as np
-from ssl_remote_sensing.downstream_tasks.segmentation.constants import DFC2020_LABELS
+
+from downstream_tasks.segmentation.constants import DFC2020_LABELS
 
 
 def train(

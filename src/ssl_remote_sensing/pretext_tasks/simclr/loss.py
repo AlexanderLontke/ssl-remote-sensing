@@ -21,11 +21,14 @@ class ContrastiveLoss(nn.Module):
         """
         z_i = F.normalize(emb_i, dim=1)
         z_j = F.normalize(emb_j, dim=1)
+        # print(f"z_i shape: {z_i.shape}, z_j shape: {z_j.shape}")
 
         representations = torch.cat([z_i, z_j], dim=0)
+        # print(f"representations shape: {representations.shape}")
         similarity_matrix = F.cosine_similarity(
             representations.unsqueeze(1), representations.unsqueeze(0), dim=2
         )
+        # print(f"similarity_matrix shape: {similarity_matrix.shape}")
 
         sim_ij = torch.diag(similarity_matrix, self.batch_size)
         sim_ji = torch.diag(similarity_matrix, -self.batch_size)

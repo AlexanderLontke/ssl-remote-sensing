@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from ssl_remote_sensing.models.ResNet18 import resnet18_encoder
+from models.ResNet18 import resnet18_encoder
 
 
 def default(val, def_val):

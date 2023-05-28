@@ -1,12 +1,17 @@
 import torch
 import wandb
 import pytorch_lightning as pl
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+# try:
+#     from pytorch_lightning.loggers import Logger
+# except ImportError:
+#     from pytorch_lightning.loggers import LightningLoggerBase
+#     Logger = LightningLoggerBase
+# from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR # TODO: the feature is marked with issue in pytorch-lightning-bolts
 from torch.optim import SGD, Adam
 
-from ssl_remote_sensing.pretext_tasks.simclr.resnet_18_backbone import AddProjection
-from ssl_remote_sensing.pretext_tasks.simclr.utils import define_parameter_groups
-from ssl_remote_sensing.pretext_tasks.simclr.loss import ContrastiveLoss
+from pretext_tasks.simclr.resnet_18_backbone import AddProjection
+from pretext_tasks.simclr.utils import define_parameter_groups
+from pretext_tasks.simclr.loss import ContrastiveLoss
 
 
 class SimCLRTraining(pl.LightningModule):
@@ -51,7 +56,11 @@ class SimCLRTraining(pl.LightningModule):
             f"Effective batch size {self.config.batch_size * self.config.gradient_accumulation_steps}"
         )
 
-        scheduler_warmup = LinearWarmupCosineAnnealingLR(
-            optimizer, warmup_epochs=10, max_epochs=max_epochs, warmup_start_lr=0.0
-        )
-        return [optimizer], [scheduler_warmup]
+        # # TODO: the feature is marked with issue in pytorch-lightning-bolts
+        # scheduler_warmup = LinearWarmupCosineAnnealingLR(
+        #     optimizer, warmup_epochs=10, max_epochs=max_epochs, warmup_start_lr=0.0
+        # )
+
+
+        # return [optimizer], [scheduler_warmup]
+        return optimizer

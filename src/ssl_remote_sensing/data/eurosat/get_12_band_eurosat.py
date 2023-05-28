@@ -1,9 +1,8 @@
-from ssl_remote_sensing.data.eurosat.eurosat_dataset import (
+from data.eurosat_dataset import (
     EuroSATDataset,
     InMemoryEuroSATDataset,
 )
 from torch.utils.data import DataLoader, random_split
-
 
 def get_eurosat_dataloader(
     root,

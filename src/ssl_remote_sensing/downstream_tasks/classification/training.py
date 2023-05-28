@@ -10,11 +10,11 @@ from tqdm import tqdm
 from torchvision.datasets import EuroSAT
 from torch.utils.data import SubsetRandomSampler, DataLoader
 
-from ssl_remote_sensing.downstream_tasks.classification.model import (
+from downstream_tasks.classification.model import (
     DownstreamClassificationNet,
 )
 
-from ssl_remote_sensing.downstream_tasks.classification.util import (
+from util import (
     get_subset_samplers_for_train_test_split,
 )
 
