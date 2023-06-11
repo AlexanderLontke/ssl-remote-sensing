@@ -1,66 +1,47 @@
 import os
+from pathlib import Path
 
 import torch
-import torchvision.models as models
-from torchvision.datasets import EuroSAT
-from torch.utils.data import DataLoader
-from torch.multiprocessing import cpu_count
 from pytorch_lightning.callbacks import GradientAccumulationScheduler, ModelCheckpoint
+import torchvision.transforms as T
 from pytorch_lightning import Trainer
+from pytorch_lightning.loggers import WandbLogger
 
-from ssl_remote_sensing.data.eurosat_dataset import means, stds
-from ssl_remote_sensing.pretext_tasks.simclr.utils import reproducibility
-from ssl_remote_sensing.pretext_tasks.simclr.training import SimCLRTraining
-from ssl_remote_sensing.pretext_tasks.simclr.augmentation import Augment
+from pretext_tasks.simclr.utils import reproducibility
+from pretext_tasks.simclr.training import SimCLRTraining
+from pretext_tasks.simclr.augmentation import Augment
+from pretext_tasks.simclr.config import get_simclr_config
+from data.bigearthnet.bigearthnet_dataloader import (
+    get_bigearthnet_dataloader,
+)
 
 # Machine setup
 available_gpus = torch.cuda.device_count()
 save_model_path = os.path.join(os.getcwd(), "saved_models/")
 print("available_gpus:", available_gpus)
 
+# Model Setup
+train_config = get_simclr_config()
+train_config.batch_size = 4096
+train_config.epochs = 40
+
 # Run setup
-filename = "SimCLR_ResNet18_adam"
+filename = f"SimCLR_BEN_ResNet18_adam_bs{train_config.batch_size}"
 save_name = filename + ".ckpt"
 resume_from_checkpoint = False
-
-
-# Model Setup
-class Hparams:
-    def __init__(self):
-        self.epochs = 1  # number of training epochs
-        self.seed = 1234  # randomness seed
-        self.cuda = False  # use nvidia gpu
-        self.img_size = 64  # image shape
-        self.save = "./saved_models/"  # save checkpoint
-        self.gradient_accumulation_steps = 1  # gradient accumulation steps
-        self.batch_size = 64
-        self.lr = 1e-3
-        self.embedding_size = 128  # papers value is 128
-        self.temperature = 0.5  # 0.1 or 0.5
-        self.weight_decay = 1e-6
-        self.checkpoint_path = None
-
-
-train_config = Hparams()
 reproducibility(train_config)
 
 model = SimCLRTraining(
     config=train_config,
-    model=models.resnet18(weights=None),
     feat_dim=512,
-    norm_means=means,
-    norm_stds=stds,
 )
 
-transform = Augment(train_config.img_size, norm_means=means, norm_stds=stds)
-
-dataset = EuroSAT(
-    "/Users/alexanderlontke/datasets/", transform=transform, download=True
-)
-data_loader = DataLoader(
-    dataset=torch.utils.data.Subset(dataset, range(200)),
+# Setup data loading and augments
+transform = Augment(train_config.img_size, normalizer=T.RandomCrop(64))
+bigearthnet_dataloader = get_bigearthnet_dataloader(
+    data_dir=Path("/content/BigEarthNet-v1.0"),
     batch_size=train_config.batch_size,
-    num_workers=cpu_count(),
+    dataset_transform=transform,
 )
 
 # Needed to get simulate a large batch size
@@ -69,26 +50,36 @@ accumulator = GradientAccumulationScheduler(scheduling={0: 1})
 checkpoint_callback = ModelCheckpoint(
     filename=filename,
     dirpath=save_model_path,
-    every_n_epochs=2,
+    every_n_epochs=5,
     save_last=True,
     save_top_k=2,
-    monitor="Contrastive loss_epoch",
+    monitor="train/NTXentLoss",
     mode="min",
 )
 
+# Setup WandB logging
+wandb_logger = WandbLogger(
+    project="ssl-remote-sensing-simclr", config=train_config.__dict__
+)
+shared_trainer_kwargs = {
+    "callbacks": [accumulator, checkpoint_callback],
+    "max_epochs": train_config.epochs,
+    "logger": wandb_logger,
+    "log_every_n_steps": 1,
+    "accelerator": "gpu",
+}
 if resume_from_checkpoint:
     trainer = Trainer(
-        callbacks=[accumulator, checkpoint_callback],
-        gpus=available_gpus,
-        max_epochs=train_config.epochs,
+        **shared_trainer_kwargs,
         resume_from_checkpoint=train_config.checkpoint_path,
     )
 else:
     trainer = Trainer(
-        callbacks=[accumulator, checkpoint_callback],
-        gpus=available_gpus,
-        max_epochs=train_config.epochs,
+        **shared_trainer_kwargs,
     )
 
-trainer.fit(model, data_loader)
+trainer.fit(model, bigearthnet_dataloader)
 trainer.save_checkpoint(save_name)
+wandb.save(checkpoint_callback.best_model_path)
+wandb.finish()
+print(f"Best model is stored under {checkpoint_callback.best_model_path}")

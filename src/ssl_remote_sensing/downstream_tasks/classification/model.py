@@ -55,18 +55,56 @@ class FullyConnectedBlock(nn.Module):
         return x
 
 
+class LinearBlock(nn.Module):
+    """
+    Model used for ML-Challenge
+    """
+
+    def __init__(self, input_dim: int, output_dim):
+        """
+        Model definition
+        """
+        super().__init__()
+        self.fc1 = nn.Linear(input_dim, output_dim)
+        self.norm = nn.BatchNorm1d(num_features=output_dim)
+
+    def forward(self, x):
+        """
+        Model forward pass
+        :param x: List of image samples
+        :return:
+        """
+        return self.norm(self.fc1(x))
+
+
 class DownstreamClassificationNet(nn.Module):
     """
     Model used for ML-Challenge
     """
 
-    def __init__(self, input_dim: int, encoder: nn.Module = None, output_dim: int = 10):
+    def __init__(
+        self,
+        input_dim: int,
+        encoder: nn.Module = None,
+        output_dim: int = 10,
+        gan_encoder: bool = False,
+        freeze_encoder: bool = True,
+        use_linear_head: bool = True,
+    ):
         """
         Model definition
         """
         super().__init__()
+        self.gan_encoder = gan_encoder
         self.encoder = encoder if encoder else EncoderBlock()
-        self.fc = FullyConnectedBlock(input_dim=input_dim, output_dim=output_dim)
+        self.encoder.train()
+        if freeze_encoder:
+            for param in self.encoder.parameters():
+                param.requires_grad = False
+        if use_linear_head:
+            self.head = LinearBlock(input_dim=input_dim, output_dim=output_dim)
+        else:
+            self.head = FullyConnectedBlock(input_dim=input_dim, output_dim=output_dim)
 
     def forward(self, x):
         """
@@ -75,5 +113,7 @@ class DownstreamClassificationNet(nn.Module):
         :return:
         """
         x = self.encoder(x)
-        x = self.fc(x)
+        if self.gan_encoder:
+            x = torch.flatten(x, 1)
+        x = self.head(x)
         return x

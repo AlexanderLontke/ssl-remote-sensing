@@ -4,17 +4,6 @@ import torch
 import matplotlib.pyplot as plt
 from torch.autograd import Variable
 
-
-def reproducibility(config):
-    SEED = int(config.seed)
-    torch.manual_seed(SEED)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    np.random.seed(SEED)
-    if config.cuda:
-        torch.cuda.manual_seed(SEED)
-
-
 def batch_mean_and_sd(loader):
 
     cnt = 0
@@ -54,3 +43,10 @@ def get_torch_vars(x):
     if torch.cuda.is_available():
         x = x.cuda()
     return Variable(x)
+
+def show(img):
+    fig, ax = plt.subplots(1, figsize=(15,15))
+    plt.axis('off')
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1,2,0)))
+    plt.show()

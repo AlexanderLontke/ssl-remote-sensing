@@ -1,54 +1,44 @@
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
-from ssl_remote_sensing.pretext_tasks.simclr.utils import device_as
 
-
-class InfoNceLoss(nn.Module):
-    """
-    InfoNCE loss as in SimCLR paper
-    """
-
-    def __init__(self, temperature=0.5):
+class ContrastiveLoss(nn.Module):
+    # https://zablo.net/blog/post/understanding-implementing-simclr-guide-eli5-pytorch/
+    def __init__(self, batch_size, temperature=0.5):
         super().__init__()
-        self.temperature = temperature
-
-    @staticmethod
-    def calc_similarity_batch(a, b):
-        representations = torch.cat([a, b], dim=0)
-        return F.cosine_similarity(
-            representations.unsqueeze(1), representations.unsqueeze(0), dim=2
+        self.batch_size = batch_size
+        self.register_buffer("temperature", torch.tensor(temperature))
+        self.register_buffer(
+            "negatives_mask",
+            (~torch.eye(batch_size * 2, batch_size * 2, dtype=torch.bool)).float(),
         )
 
-    def forward(self, proj_1, proj_2):
+    def forward(self, emb_i, emb_j):
         """
-        proj_1 and proj_2 are batched embeddings [batch, embedding_dim]
-        where corresponding indices are pairs
-        z_i, z_j as in the SimCLR paper
+        emb_i and emb_j are batches of embeddings, where corresponding indices are pairs
+        z_i, z_j as per SimCLR paper
         """
-        assert proj_1.shape == proj_2.shape, "Projections' shapes need to match"
-        batch_size = proj_1.shape[0]
-        mask = (~torch.eye(batch_size * 2, batch_size * 2, dtype=torch.bool)).float()
+        z_i = F.normalize(emb_i, dim=1)
+        z_j = F.normalize(emb_j, dim=1)
+        # print(f"z_i shape: {z_i.shape}, z_j shape: {z_j.shape}")
 
-        z_i = F.normalize(proj_1, p=2, dim=1)
-        z_j = F.normalize(proj_2, p=2, dim=1)
+        representations = torch.cat([z_i, z_j], dim=0)
+        # print(f"representations shape: {representations.shape}")
+        similarity_matrix = F.cosine_similarity(
+            representations.unsqueeze(1), representations.unsqueeze(0), dim=2
+        )
+        # print(f"similarity_matrix shape: {similarity_matrix.shape}")
 
-        similarity_matrix = self.calc_similarity_batch(z_i, z_j)
-
-        sim_ij = torch.diag(similarity_matrix, batch_size)
-        sim_ji = torch.diag(similarity_matrix, -batch_size)
-
+        sim_ij = torch.diag(similarity_matrix, self.batch_size)
+        sim_ji = torch.diag(similarity_matrix, -self.batch_size)
         positives = torch.cat([sim_ij, sim_ji], dim=0)
 
         nominator = torch.exp(positives / self.temperature)
-
-        print("mask", device_as(mask, similarity_matrix).shape)
-        print("exp", torch.exp(similarity_matrix / self.temperature).shape)
-        denominator = device_as(mask, similarity_matrix) * torch.exp(
+        denominator = self.negatives_mask * torch.exp(
             similarity_matrix / self.temperature
         )
 
-        all_losses = torch.log(nominator / torch.sum(denominator, dim=1))
-        loss = torch.sum(all_losses) / (2 * batch_size)
+        loss_partial = -torch.log(nominator / torch.sum(denominator, dim=1))
+        loss = torch.sum(loss_partial) / (2 * self.batch_size)
         return loss
